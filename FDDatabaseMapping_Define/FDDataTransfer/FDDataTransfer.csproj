@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FDDataTransferApp\FDDataTransfer.App.csproj" />
+    <ProjectReference Include="..\FDDataTransferCore.MySql\FDDataTransfer.MySql.csproj" />
+    <ProjectReference Include="..\FDDataTransferCore.SqlServer\FDDataTransfer.SqlServer.csproj" />
+    <ProjectReference Include="..\FDDataTransferCore\FDDataTransfer.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="config_temp\User_Account_TableMapping.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TableMapping - 复制.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="configs\TableMapping.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config_temp\FD_User_TableMapping2.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
