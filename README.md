@@ -1,13 +1,14 @@
 # DatabaseDataMapping
 Migration the data from other databases(Sql Server or MySQL) by the configuration relations.
 ---
-__strong__Edit the config by json(which json file in the "config" folder):
+Edit the config by json(which json file in the "config" folder):
+---------------------------------------------------------------
 ### The details:
 * ConnStringFrom:where the data from.
 * ConnStringTo:where the data to.
 * DBContextTypeFrom:the from data server provider how to connect,the database ado.net access by the database type provider(can defined by oneself),but the namespace started with "FDDataTransfer".
 * DBContextTypeTo:the from data server provider how to connect,the database ado.net access by the database type provider(can defined by oneself),but the namespace started with "FDDataTransfer".
->> the default implemented like this:
+### the default implemented like this:
 * DBContextTypeFrom: "FDDataTransfer.SqlServer.Repositories.MySqlRepositoryContext"
 * DBContextTypeTo: "FDDataTransfer.SqlServer.Repositories.SqlServerRepositoryContext"
 
