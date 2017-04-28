@@ -1,6 +1,6 @@
 ﻿{
-  "ConnStringFrom": "server=localhost;database=fdtest;user=root;password=1234",
-  "ConnStringTo": "server=.;initial catalog=testdd;uid=sa;password=123",
+  "ConnStringFrom": "server=localhost;database=fdtest;user=***;password=***",
+  "ConnStringTo": "server=.;initial catalog=testdd;uid=***;password=***",
   "DBContextTypeFrom": "FDDataTransfer.SqlServer.Repositories.MySqlRepositoryContext",
   "DBContextTypeTo": "FDDataTransfer.SqlServer.Repositories.SqlServerRepositoryContext",
   "QueueMaxCount": 500,
