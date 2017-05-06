@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FDDataTransferApp\FDDataTransfer.App.csproj" />
+    <ProjectReference Include="..\FDDataTransferCore.MySql\FDDataTransfer.MySql.csproj" />
+    <ProjectReference Include="..\FDDataTransferCore.SqlServer\FDDataTransfer.SqlServer.csproj" />
+    <ProjectReference Include="..\FDDataTransferCore\FDDataTransfer.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="configs\TableMapping.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="log4net.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

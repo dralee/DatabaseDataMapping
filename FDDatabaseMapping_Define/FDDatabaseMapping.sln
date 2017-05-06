@@ -1,0 +1,58 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FDDatabaseMappingCore", "FDDatabaseMappingCore\FDDatabaseMappingCore.csproj", "{161BCA72-3793-4CB8-9BD0-4ADC6CF9CD8C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FDDataTransfer", "FDDataTransfer\FDDataTransfer.csproj", "{362B59B2-034D-4C34-9A66-1EC3B244EC75}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FDDataTransfer.Core", "FDDataTransferCore\FDDataTransfer.Core.csproj", "{C33477A4-C130-489D-A1A2-5E55B1F92CD9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FDDataTransfer.SqlServer", "FDDataTransferCore.SqlServer\FDDataTransfer.SqlServer.csproj", "{CE4659B5-C8B5-4319-9928-6B2445F4512D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FDDataTransfer.MySql", "FDDataTransferCore.MySql\FDDataTransfer.MySql.csproj", "{C3441819-288A-4865-BA61-A370D60BC76C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FDDataTransfer.App", "FDDataTransferApp\FDDataTransfer.App.csproj", "{E58FA82E-C0D9-4F83-9584-42C6AD101FD1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FDDataTransfer.Infrastructure", "FDDataTransfer.Infrastructure\FDDataTransfer.Infrastructure.csproj", "{AF64F8CC-C766-4999-80D2-2988C8A9F0D8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{161BCA72-3793-4CB8-9BD0-4ADC6CF9CD8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{161BCA72-3793-4CB8-9BD0-4ADC6CF9CD8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{161BCA72-3793-4CB8-9BD0-4ADC6CF9CD8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{161BCA72-3793-4CB8-9BD0-4ADC6CF9CD8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{362B59B2-034D-4C34-9A66-1EC3B244EC75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{362B59B2-034D-4C34-9A66-1EC3B244EC75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{362B59B2-034D-4C34-9A66-1EC3B244EC75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{362B59B2-034D-4C34-9A66-1EC3B244EC75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C33477A4-C130-489D-A1A2-5E55B1F92CD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C33477A4-C130-489D-A1A2-5E55B1F92CD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C33477A4-C130-489D-A1A2-5E55B1F92CD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C33477A4-C130-489D-A1A2-5E55B1F92CD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE4659B5-C8B5-4319-9928-6B2445F4512D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE4659B5-C8B5-4319-9928-6B2445F4512D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE4659B5-C8B5-4319-9928-6B2445F4512D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE4659B5-C8B5-4319-9928-6B2445F4512D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3441819-288A-4865-BA61-A370D60BC76C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3441819-288A-4865-BA61-A370D60BC76C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3441819-288A-4865-BA61-A370D60BC76C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3441819-288A-4865-BA61-A370D60BC76C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E58FA82E-C0D9-4F83-9584-42C6AD101FD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E58FA82E-C0D9-4F83-9584-42C6AD101FD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E58FA82E-C0D9-4F83-9584-42C6AD101FD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E58FA82E-C0D9-4F83-9584-42C6AD101FD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF64F8CC-C766-4999-80D2-2988C8A9F0D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF64F8CC-C766-4999-80D2-2988C8A9F0D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF64F8CC-C766-4999-80D2-2988C8A9F0D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF64F8CC-C766-4999-80D2-2988C8A9F0D8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

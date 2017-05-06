@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FDDataTransfer.Infrastructure\FDDataTransfer.Infrastructure.csproj" />
+    <ProjectReference Include="..\FDDataTransferCore.MySql\FDDataTransfer.MySql.csproj" />
+    <ProjectReference Include="..\FDDataTransferCore.SqlServer\FDDataTransfer.SqlServer.csproj" />
+    <ProjectReference Include="..\FDDataTransferCore\FDDataTransfer.Core.csproj" />
+  </ItemGroup>
+
+</Project>

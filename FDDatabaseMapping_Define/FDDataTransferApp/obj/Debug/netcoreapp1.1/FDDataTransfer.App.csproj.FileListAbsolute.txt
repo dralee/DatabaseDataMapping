@@ -1,0 +1,15 @@
+D:\Document\Project\LongAi2\tools\migration\FDDataTransferApp\bin\Debug\netcoreapp1.1\FDDataTransfer.App.deps.json
+D:\Document\Project\LongAi2\tools\migration\FDDataTransferApp\bin\Debug\netcoreapp1.1\FDDataTransfer.App.dll
+D:\Document\Project\LongAi2\tools\migration\FDDataTransferApp\bin\Debug\netcoreapp1.1\FDDataTransfer.App.pdb
+D:\Document\Project\LongAi2\tools\migration\FDDataTransferApp\bin\Debug\netcoreapp1.1\FDDataTransfer.Core.dll
+D:\Document\Project\LongAi2\tools\migration\FDDataTransferApp\bin\Debug\netcoreapp1.1\FDDataTransfer.Infrastructure.dll
+D:\Document\Project\LongAi2\tools\migration\FDDataTransferApp\bin\Debug\netcoreapp1.1\FDDataTransferMySql.dll
+D:\Document\Project\LongAi2\tools\migration\FDDataTransferApp\bin\Debug\netcoreapp1.1\FDDataTransferSqlServer.dll
+D:\Document\Project\LongAi2\tools\migration\FDDataTransferApp\bin\Debug\netcoreapp1.1\FDDataTransfer.Infrastructure.pdb
+D:\Document\Project\LongAi2\tools\migration\FDDataTransferApp\bin\Debug\netcoreapp1.1\FDDataTransferMySql.pdb
+D:\Document\Project\LongAi2\tools\migration\FDDataTransferApp\bin\Debug\netcoreapp1.1\FDDataTransferSqlServer.pdb
+D:\Document\Project\LongAi2\tools\migration\FDDataTransferApp\bin\Debug\netcoreapp1.1\FDDataTransfer.Core.pdb
+D:\Document\Project\LongAi2\tools\migration\FDDataTransferApp\obj\Debug\netcoreapp1.1\FDDataTransfer.App.csprojResolveAssemblyReference.cache
+D:\Document\Project\LongAi2\tools\migration\FDDataTransferApp\obj\Debug\netcoreapp1.1\FDDataTransfer.App.AssemblyInfo.cs
+D:\Document\Project\LongAi2\tools\migration\FDDataTransferApp\obj\Debug\netcoreapp1.1\FDDataTransfer.App.dll
+D:\Document\Project\LongAi2\tools\migration\FDDataTransferApp\obj\Debug\netcoreapp1.1\FDDataTransfer.App.pdb
