@@ -7,9 +7,15 @@ using System.Text;
 
 namespace FDDataTransfer.App.Services
 {
-    public class BaseService : IBaseService
+    public abstract class BaseService : IBaseService
     {
         private static readonly string[] _timeoutMsg = { "timeout", "time out", "period", "SocketException", "超时", "过时", "等待" };
+
+        /// <summary>
+        /// 服务名称
+        /// </summary>
+        protected abstract string Name { get; }
+
         public IDictionary<string, string> ObjectToString(IDictionary<string, object> items)
         {
             Func<Type, bool> isNumeric = type =>

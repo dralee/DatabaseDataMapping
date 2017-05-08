@@ -63,6 +63,6 @@ namespace FDDataTransfer.App.Entities
     /// </summary>
     public enum MessageType
     {
-        Normal, UserAccount
+        Normal, UserDefine
     }
 }

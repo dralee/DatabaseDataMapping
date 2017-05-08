@@ -9,6 +9,10 @@ namespace FDDataTransfer.App.Entities
         public ExecuteState State { get; set; }
         public string Message { get; set; }
         public Exception Exception { get; set; }
+        /// <summary>
+        /// 指定服务是否已完成
+        /// </summary>
+        public bool ServiceFinished { get; set; }
 
         public override string ToString()
         {

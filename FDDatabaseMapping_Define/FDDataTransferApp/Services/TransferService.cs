@@ -13,28 +13,9 @@ using FDDataTransfer.Infrastructure.Logger;
 
 namespace FDDataTransfer.App.Services
 {
-    public class TransferService : BaseService, ITransferService//ServiceBase<Transfer>, ITransferService
+    public class TransferService : QueueBaseService, ITransferService //ServiceBase<Transfer>, ITransferService
     {
-        private OperConext<Transfer> _context;
-
-        IMessageQueue<Message> _queue = new MessageQueue<Message>();
-
-        //public TransferService(IRepositoryContext<Transfer> context) : base(new ReadWriteRepository<Transfer>(context))
-        //{
-
-        //}
-
-        /// <summary>
-        /// 是否已达最大队列数
-        /// </summary>
-        public bool IsMaxQueue
-        {
-            get
-            {
-                var max = _context.CurrentTableConfig.QueueMaxCount;
-                return max > 0 && max < _queue.Count;
-            }
-        }
+        protected override string Name => "基础数据初始化";
 
         public TransferService(string configFileName)
         {
@@ -45,308 +26,9 @@ namespace FDDataTransfer.App.Services
             _context = new OperConext<Transfer>(config);
         }
 
-        private bool CheckMessageType(int type)
+        protected override void ExecuteForUserDefineBusiness(IRepositoryContext<Transfer> context, Message message)
         {
-            var values = Enum.GetValues(typeof(MessageType));
-            for (int i = 0; i < values.Length; ++i)
-            {
-                if (values.GetValue(i).ToInt() == type)
-                    return true;
-            }
-            return false;
-        }
-
-        public void Read(IRepositoryContext<Transfer> context, Table tableConfig, Action<ExecuteResult> readFinish)
-        {
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
-            if (tableConfig == null)
-                throw new ArgumentNullException(nameof(tableConfig));
-            if (!CheckMessageType(tableConfig.MessageType))
-                throw new ArgumentException("MessageType设置异常");
-            //if (srcTableName.IsNullOrEmpty())
-            //    throw new ArgumentNullException(nameof(srcTableName));
-            //if (targetTableName.IsNullOrEmpty())
-            //    throw new ArgumentNullException(nameof(targetTableName));
-            //if (key.IsNullOrEmpty())
-            //    throw new ArgumentNullException(nameof(key));
-            //if (columnMapper == null || columnMapper.Count == 0)
-            //    throw new ArgumentNullException(nameof(columnMapper));
-
-            /*if (tableConfig.ManyToOne && tableConfig.ManyToOneDefaultValues != null)
-            {
-                int count = 0;
-                for (int i = 0; i < tableConfig.ManyToOneDefaultValues.Count; ++i)
-                {
-                    var item = tableConfig.ManyToOneDefaultValues[i];
-                    if (i == 0)
-                    {
-                        count = item.Values.Count;
-                    }
-                    else if (count != item.Values.Count)
-                    {
-                        throw new ArgumentException($"列{item.Name}多值对一列的配置默认值有误");
-                    }
-                }
-            }*/
-
-            string srcTableName = tableConfig.TableFrom;
-            string targetTableName = tableConfig.TableTo;
-            string key = tableConfig.KeyFrom;
-            Dictionary<string, string> columnMapper = tableConfig.Columns.ToDictionary();
-            int perExecuteCount = tableConfig.PerExecuteCount;
-            Action<IDictionary<string, object>> checkDefaultValues = dic =>
-             {
-                 if (tableConfig.ColumnDefaultValues != null && tableConfig.ColumnDefaultValues.Count > 0)
-                 {
-                     foreach (var defValue in tableConfig.ColumnDefaultValues)
-                     {
-                         if (!dic.ContainsKey(defValue.Name))
-                             dic[defValue.Name] = defValue.Value;
-                     }
-                 }
-             };
-
-            try
-            {
-                var index = context.ExecuteScalar($"SELECT MIN({key}) FROM {srcTableName}").ToLong();
-                var max = context.ExecuteScalar($"SELECT MAX({key}) FROM {srcTableName}").ToLong();
-                var count = 0;
-                var perCount = perExecuteCount;
-                Func<long> last = () => index + perCount - 1;
-                var columns = columnMapper.Keys.ToList();
-                var cKey = columns.FirstOrDefault(c => c.Equals(key));
-                if (cKey == null)
-                {
-                    columns.Add(key);
-                }
-                var extendQueryColumns = tableConfig.ExtendQueryColumns;
-                if (extendQueryColumns != null && extendQueryColumns.Count > 0)
-                {
-                    foreach (var column in extendQueryColumns)
-                    {
-                        if (!column.IsNullOrEmpty() && !columns.Contains(column))
-                        {
-                            columns.Add(column);
-                        }
-                    }
-                }
-                while (index < max)
-                {
-                    IEnumerable<IDictionary<string, object>> items = context.Get(srcTableName, columns, $"{key} BETWEEN {index} AND {last()}");
-                    count += items.Count();
-
-                    foreach (var item in items)
-                    {
-                        if (IsMaxQueue)
-                        {
-                            SLEEP:
-                            Thread.Sleep(100);
-                            if (IsMaxQueue)
-                                goto SLEEP;
-                        }
-                        Dictionary<string, object> targetItem = new Dictionary<string, object>();
-                        IDictionary<string, object> extendItem = new Dictionary<string, object>();
-                        List<string> manyToOneKeys = new List<string>();
-                        foreach (var cValue in item)
-                        {
-                            if (columnMapper.ContainsKey(cValue.Key))
-                            {
-                                var ckey = columnMapper[cValue.Key];
-                                if (tableConfig.ManyToOne)
-                                {
-                                    if (!targetItem.ContainsKey(ckey))
-                                    {
-                                        manyToOneKeys.Add(ckey);
-                                        List<object> values = new List<object>();
-                                        values.Add(cValue.Value);
-                                        targetItem[ckey] = values;
-                                    }
-                                }
-                                else
-                                {
-                                    targetItem[ckey] = cValue.Value;
-                                }
-                            }
-                            else // 扩展数据
-                            {
-                                extendItem[cValue.Key] = cValue.Value;
-                            }
-                        }
-                        checkDefaultValues(targetItem);
-                        var message = new Message(targetItem, extendItem) { TargetTable = targetTableName, MessageType = (MessageType)tableConfig.MessageType };//, ManyToOneData = MapManyToOne(tableConfig.ManyToOneDefaultValues) };
-                        CheckMessageStatus(message);
-                        _queue.Enqueue(message);
-                        this.Log($"Execute Read: Current Queue({_queue.Count}){message}");
-                    }
-                    index += perCount;
-                }
-                if (readFinish != null)
-                {
-                    ExecuteResult result = new ExecuteResult { State = ExecuteState.Success, Message = $"[{DateTime.Now.ToFormatString()}]已读取完源[{context.ConnString}]表{srcTableName}中的{count}条记录到队列。当前队列数量{_queue.Count}" };
-                    readFinish(result);
-                    this.Log(result);
-                }
-            }
-            catch (Exception ex)
-            {
-                this.Log("Execute Read Error", ex);
-            }
-        }
-
-        public void Run(Action<ExecuteResult> readFinish, Action<ExecuteResult> writeFinish)
-        {
-            foreach (var tableConfig in _context.CurrentTableConfig.Tables)
-            {
-                Task.Run(() =>
-                {
-                    try
-                    {
-                        Read(_context.FromContext, tableConfig, readFinish);
-                    }
-                    catch (Exception ex)
-                    {
-                        this.Log("Execute Read Error", ex);
-                        readFinish?.Invoke(new ExecuteResult { Exception = ex, Message = "Execute Read Error:", State = ExecuteState.Fail });
-                    }
-                });
-            }
-
-            Task.Run(() =>
-            {
-                try
-                {
-                    Write(_context.ToContext, writeFinish);
-                }
-                catch (Exception ex)
-                {
-                    writeFinish?.Invoke(new ExecuteResult { Exception = ex, Message = "Execute Write Error:", State = ExecuteState.Fail });
-                    this.Log("Execute Write Error", ex);
-                }
-            });
-        }
-
-        public void Write(IRepositoryContext<Transfer> context, Action<ExecuteResult> writeFinish)
-        {
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
-
-            try
-            {
-                DateTime dtLast = DateTime.Now;
-                int checkTimes = 0;
-                long elapseMinutes = 0;
-                Func<bool> checkWrite = () =>
-                {
-                    elapseMinutes = (DateTime.Now - dtLast).Minutes;
-                    if ((checkTimes == 0) || elapseMinutes >= 1)
-                    {
-                        checkTimes++;
-                        dtLast = DateTime.Now;
-                        this.Log($"Executing Write: nothing to execute. try for {checkTimes} minutes.Queue current({_queue.Count})");
-                    }
-                    return _context.CurrentTableConfig.NoMessageToQuit != 0 && _context.CurrentTableConfig.NoMessageToQuit < checkTimes; // 是否满足中止条件
-                };
-                while (true)
-                {
-                    if (_queue.Count == 0)
-                    {
-                        if (checkWrite())
-                            break;
-                        continue;
-                    }
-                    checkTimes = 0;
-                    var message = _queue.Dequeue();
-                    if (message != null)
-                    {
-                        try
-                        {
-                            switch (message.MessageType)
-                            {
-                                case MessageType.Normal:
-                                    context.Execute(message.TargetTable, ObjectToString(message.Data));
-                                    break;
-                                case MessageType.UserAccount:
-                                    ExecuteForUserAndAccount(context, message);
-                                    break;
-                            }
-                            //message.ManyToKeys != null && message.ManyToKeys.Count > 0)                                
-                            //ExecuteSpecialManyToOne(context, message.TargetTable, message.Data, message.ManyToKeys);
-                            this.Log($"Execute Write:{message} SUCCESS.");
-                        }
-                        catch (Exception ex)
-                        {
-                            if (message.NeedTry(ex.Message))
-                            {
-                                _queue.Enqueue(message);
-                                this.Log($"Execute Write:{message} Failed.Retrying...", ex);
-                            }
-                            else
-                            {
-                                _queue.FailureMessages.Add(message);
-                                this.Log($"Execute Write:{message} Failed.Enter for Failure Message.", ex);
-                            }
-                        }
-                    }
-                }
-                writeFinish?.Invoke(new ExecuteResult { Message = $"Execute Write Finished by timeout {elapseMinutes} minutes.", State = ExecuteState.Success });
-            }
-            catch (Exception ex)
-            {
-                this.Log("Execute Write Error", ex);
-                writeFinish?.Invoke(new ExecuteResult { Exception = ex, Message = "Execute Write Error:", State = ExecuteState.Fail });
-            }
-        }
-
-        /// <summary>
-        /// 从message中检索数据
-        /// </summary>
-        Func<string, Message, object> getMessageData = (name, message) =>
-         {
-             object res;
-             if (message.Data.ContainsKey(name))
-             {
-                 res = message.Data[name];
-             }
-             else if (message.ExtendData.ContainsKey(name))
-             {
-                 res = message.ExtendData[name];
-             }
-             else
-             {
-                 res = null;
-             }
-             return res;
-         };
-
-        /// <summary>
-        /// 系统间状态转换
-        /// </summary>
-        /// <param name="message"></param>
-        private void CheckMessageStatus(Message message)
-        {
-            Func<int, int> statusMapping = status =>
-             {
-                 int result = 0;
-                 switch (status)
-                 {
-                     case 3:
-                         result = 0; break;
-                     case 2:
-                         result = 1; break;
-                     case 0:
-                         result = 2; break;
-                 }
-                 return result;
-             };
-            if (message.Data.ContainsKey("Status"))
-            {
-                message.Data["Status"] = statusMapping(message.Data["Status"].ToInt());
-            }
-            if (message.ExtendData.ContainsKey("Status"))
-            {
-                message.ExtendData["Status"] = statusMapping(message.ExtendData["Status"].ToInt());
-            }
+            ExecuteForUserAndAccount(context, message);
         }
 
         /// <summary>
@@ -375,9 +57,9 @@ namespace FDDataTransfer.App.Services
                 else
                 {
                     if (type.Name.Equals("UE_cp"))
-                        row["Amount"] = getMessageData(type.Name, message).ToDecimal() * 850;
+                        row["Amount"] = GetMessageData(type.Name, message).ToDecimal() * 850;
                     else
-                        row["Amount"] = getMessageData(type.Name, message);
+                        row["Amount"] = GetMessageData(type.Name, message);
                 }
                 row["Currency"] = type.Currency;
                 row["CreateTime"] = DateTime.Now;
@@ -388,9 +70,9 @@ namespace FDDataTransfer.App.Services
                 row["MoneyTypeId"] = type.MoneyType;
                 row["Remark"] = "from qefgj database.";
                 row["SortOrder"] = 1000;
-                row["Status"] = getMessageData("Status", message);
+                row["Status"] = GetMessageData("Status", message);
                 row["UserId"] = userId;
-                row["SrcId"] = getMessageData("SrcId", message);
+                row["SrcId"] = GetMessageData("SrcId", message);
                 context.Execute("Finance_Account", ObjectToString(row));
             }
 
@@ -408,7 +90,7 @@ namespace FDDataTransfer.App.Services
         private void ExecuteForUserTypeIndex(IRepositoryContext<Transfer> context, Message message, long userId)
         {
             IDictionary<string, object> row = new Dictionary<string, object>();
-            var level = getMessageData("UE_level", message).ToInt();
+            var level = GetMessageData("UE_level", message).ToInt();
             var userGrade = _userGrades[level - 1];
             row["UserGradeId"] = userGrade.Id;
             row["UserTypeId"] = userGrade.UserTypeId;
@@ -420,8 +102,8 @@ namespace FDDataTransfer.App.Services
             row["ModifiedTime"] = "0001-01-01 00:00:00.0000000";
             row["Remark"] = "from qefgj database.";
             row["SortOrder"] = 1000;
-            row["Status"] = getMessageData("Status", message);
-            row["SrcId"] = getMessageData("SrcId", message);
+            row["Status"] = GetMessageData("Status", message);
+            row["SrcId"] = GetMessageData("SrcId", message);
 
             row["ParentId"] = 0;
             row["UserRegionId"] = 0;

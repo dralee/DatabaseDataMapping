@@ -35,6 +35,13 @@ namespace FDDataTransfer.Infrastructure.Repositories
         /// <returns></returns>
         IEnumerable<IDictionary<string, object>> Get(string tableName, IEnumerable<string> columns, string condition);
         /// <summary>
+        /// 据sql获取数据
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="columns">如指定，则只返回指定列数据（不指定则为null，不要初始化）</param>
+        /// <returns></returns>
+        IEnumerable<IDictionary<string, object>> Get(string sql, IEnumerable<string> columns = null);
+        /// <summary>
         /// 执行
         /// </summary>
         /// <param name="tableName">表名</param>

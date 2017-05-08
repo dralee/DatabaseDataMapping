@@ -6,8 +6,9 @@ using System.Collections.Generic;
 
 namespace FDDataTransfer.App.Services
 {
-    public interface ITransferService : IBaseService// : IService<Transfer>
+    public interface ITransferService : IQueueBaseService// : IService<Transfer>
     {
+        /*
         /// <summary>
         /// 读取源数据
         /// </summary>
@@ -33,6 +34,6 @@ namespace FDDataTransfer.App.Services
         /// <param name="readFinish">读取操作完成通知</param>
         /// <param name="writeFinish">写入操作完成通知</param>
         void Run(Action<ExecuteResult> readFinish, Action<ExecuteResult> writeFinish);
-        
+        */
     }
 }

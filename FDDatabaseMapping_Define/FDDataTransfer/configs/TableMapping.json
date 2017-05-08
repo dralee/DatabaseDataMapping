@@ -1,6 +1,6 @@
 ﻿{
-  "ConnStringFrom": "server=localhost;database=qefgj;user=root;password=1234",
-  "ConnStringTo": "Data Source=183.60.143.29,6100;Initial Catalog=lalz-5ug-com;UID=lalz-5ug-com;PWD=nObwBM7kePlRi0Gs;", //"Data Source=localhost;Initial Catalog=zkcloud;UID=sa;PWD=123;",
+  "ConnStringFrom": "server=****;database=****;user=****;password=****",
+  "ConnStringTo": "Data Source=****;Initial Catalog=****;UID=****;PWD=****;", //"Data Source=****;Initial Catalog=****;UID=****;PWD=****;",
   "DBContextTypeFrom": "FDDataTransfer.SqlServer.Repositories.MySqlRepositoryContext",
   "DBContextTypeTo": "FDDataTransfer.SqlServer.Repositories.SqlServerRepositoryContext",
   "QueueMaxCount": 1000,
@@ -63,7 +63,7 @@
           "ColumnTo": "UserName"
         }
       ],
-      "ExtendQueryColumns": [ "UE_money", "UE_ji_money", "UE_register", "UE_cp", "UE_sum", "UE_dai_money", "UE_integral", "UE_level" ],
+      "ExtendQueryColumns": [ "UE_money", "UE_ji_money", "UE_register", "UE_cp", "UE_sum", "UE_dai_money", "UE_integral", "UE_level", "left_num", "right_num", "left_duipen", "right_duipen", "left_duipen_total", "right_duipen_total", "yj_total" ],
       "ColumnDefaultValues": [
         {
           "Name": "Birthday",

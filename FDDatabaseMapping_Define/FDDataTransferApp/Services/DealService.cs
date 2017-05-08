@@ -13,8 +13,11 @@ namespace FDDataTransfer.App.Services
     public class DealService : BaseService, IDealService
     {
         private OperConext<Transfer> _context;
-        private IEnumerable<IDictionary<string, object>> _usersFrom, _usersTo;
+        private IEnumerable<IDictionary<string, object>> _usersFrom;
+        private IList<IDictionary<string, object>> _usersTo;
         private bool _isContinueToDeal; // 增量处理
+
+        protected override string Name => "推荐、安置数据处理";
 
         public DealService(string configFileName, bool isContinueToDeal)
         {
@@ -27,11 +30,6 @@ namespace FDDataTransfer.App.Services
             _context = new OperConext<Transfer>(config);
             _isContinueToDeal = isContinueToDeal;
         }
-
-        //private void InitUserData(IRepositoryContext<Transfer> contextFrom, IRepositoryContext<Transfer> contextTo)
-        //{
-
-        //}
 
         /// <summary>
         /// 更新推荐关系
@@ -46,7 +44,7 @@ namespace FDDataTransfer.App.Services
                 // if (_usersFrom == null)
                 _usersFrom = contextFrom.Get("qefgj_user", new string[] { "UE_ID", "UE_account" }, "");
                 //if (_usersTo == null)
-                _usersTo = contextTo.Get("User_User", new string[] { "Id", "UserName" }, _isContinueToDeal ? "SrcId>0 AND ParentId=0" : "");
+                _usersTo = contextTo.Get("User_User", new string[] { "Id", "UserName" }, _isContinueToDeal ? "SrcId>0 AND ParentId=0" : "").ToList();
             });
 
             TimeOutTryAgain(() =>
@@ -123,22 +121,28 @@ namespace FDDataTransfer.App.Services
             {
                 if (_usersFrom == null)
                     _usersFrom = contextFrom.Get("qefgj_user", new string[] { "UE_ID", "UE_account" }, "");
-                //if (_usersTo == null)
-                //{
+
                 if (_isContinueToDeal)
                 {
                     var userRelations = contextTo.Get("User_PlacementRelation", new string[] { "UserId" }, "SrcId>0")?.ToList();
-                    _usersTo = contextTo.Get("User_User", new string[] { "Id", "UserName" }, _isContinueToDeal ? "SrcId>0" : "");
+                    _usersTo = contextTo.Get("User_User", new string[] { "Id", "UserName" }, _isContinueToDeal ? "SrcId>0" : "").ToList();
                     if (userRelations != null && userRelations.Count > 0)
                     {
-                        _usersTo = _usersTo.Where(u => !userRelations.Exists(r => r["UserId"].Equals(u["Id"])))?.ToList();
+                        //_usersTo = _usersTo.Where(u => !userRelations.Exists(r => r["UserId"].Equals(u["Id"])))?.ToList();
+                        foreach (var relation in userRelations)
+                        {
+                            var user = _usersTo.FirstOrDefault(u => relation["UserId"].Equals(u["Id"]));
+                            if (user != null)
+                            {
+                                _usersTo.Remove(user);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _usersTo = contextTo.Get("User_User", new string[] { "Id", "UserName" }, "").ToList();
                     }
                 }
-                else
-                {
-                    _usersTo = contextTo.Get("User_User", new string[] { "Id", "UserName" }, "");
-                }
-                //}
             });
 
             TimeOutTryAgain(() =>
@@ -215,6 +219,12 @@ namespace FDDataTransfer.App.Services
 
         public void Run(Action<ExecuteResult> execResult)
         {
+            RunRecommend(execResult);
+            RunRelation(execResult);
+        }
+
+        public void RunRecommend(Action<ExecuteResult> execResult)
+        {
             try
             {
                 ExecuteResult result = new ExecuteResult { State = ExecuteState.Success, Message = $"[{DateTime.Now.ToFormatString()}] 正在处理推荐关系..." }; //{Environment.NewLine}具体功能正开发中，稍后开放."
@@ -223,12 +233,28 @@ namespace FDDataTransfer.App.Services
 
                 ExecuteUserRecommend(_context.FromContext, _context.ToContext);
 
-                result = new ExecuteResult { State = ExecuteState.Success, Message = $"[{DateTime.Now.ToFormatString()}]推荐关系处理完毕！{Environment.NewLine}正在处理安置关系..." };
+                result = new ExecuteResult { ServiceFinished = true, State = ExecuteState.Success, Message = $"[{DateTime.Now.ToFormatString()}] 推荐关系处理完毕！" };
+                execResult?.Invoke(result);
+                this.Log(result);
+            }
+            catch (Exception ex)
+            {
+                this.Log("Execute Deal Error", ex);
+                execResult?.Invoke(new ExecuteResult { Exception = ex, Message = "Execute Deal Error:", State = ExecuteState.Fail });
+            }
+        }
+
+        public void RunRelation(Action<ExecuteResult> execResult)
+        {
+            try
+            {
+                ExecuteResult result = new ExecuteResult { State = ExecuteState.Success, Message = $"[{DateTime.Now.ToFormatString()}]{Environment.NewLine}正在处理安置关系..." };
                 execResult?.Invoke(result);
                 this.Log(result);
 
                 ExecuteRelation(_context.FromContext, _context.ToContext);
-                result = new ExecuteResult { State = ExecuteState.Success, Message = $"[{DateTime.Now.ToFormatString()}]安置关系处理完毕！" };
+
+                result = new ExecuteResult { ServiceFinished = true, State = ExecuteState.Success, Message = $"[{DateTime.Now.ToFormatString()}]安置关系处理完毕！" };
                 execResult?.Invoke(result);
                 this.Log(result);
             }

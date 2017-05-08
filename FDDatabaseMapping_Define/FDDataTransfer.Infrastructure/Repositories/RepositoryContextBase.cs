@@ -262,15 +262,30 @@ namespace FDDataTransfer.Infrastructure.Repositories
             {
                 sb.AppendFormat(" WHERE {0}", condition);
             }
-            using (DbDataReader reader = ExecuteReader(sb.ToString()))
+            return Get(sb.ToString(),columns);
+        }
+
+        public IEnumerable<IDictionary<string, object>> Get(string sql, IEnumerable<string> columns = null)
+        {
+            using (DbDataReader reader = ExecuteReader(sql))
             {
                 List<Dictionary<string, object>> res = new List<Dictionary<string, object>>();
                 while (reader.Read())
                 {
                     Dictionary<string, object> item = new Dictionary<string, object>();
-                    foreach (var c in columns)
+                    if (columns != null)
                     {
-                        item.Add(c, reader[c]);
+                        foreach (var c in columns)
+                        {
+                            item.Add(c, reader[c]);
+                        }
+                    }
+                    else
+                    {
+                        for (var i = 0; i < reader.FieldCount; ++i)
+                        {
+                            item.Add(reader.GetName(i), reader.GetValue(i));
+                        }
                     }
                     res.Add(item);
                 }

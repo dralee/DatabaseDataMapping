@@ -14,20 +14,8 @@ namespace FDDataTransfer
     {
         static void Main(string[] args)
         {
-            //Console.WriteLine("args length:{0}", args.Length);
-            //foreach (var s in args)
-            //{
-            //    Console.WriteLine(s);
-            //}
-            //return;
             try
             {
-                //var context = new OperConext<Transfer>();
-                //    new DBConfig
-                //{
-                //    ServerConnStringFrom = "server=localhost;database=fdtest;userId=root;password=1234",
-                //    ServerConnStringTo = "server=.;initial catalog=testdd;uid=sa;password=123"
-                //});
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
                 ConfigManager.Default.Init();
@@ -40,7 +28,9 @@ namespace FDDataTransfer
                 {
                     ShowMenu();
                     cmd = Console.ReadLine();
-                    if (cmd.StartsWith("deal", StringComparison.OrdinalIgnoreCase))
+                    if (cmd.StartsWith("deal", StringComparison.OrdinalIgnoreCase)
+                        || cmd.StartsWith("recommend", StringComparison.OrdinalIgnoreCase)
+                        || cmd.StartsWith("relation", StringComparison.OrdinalIgnoreCase))
                     {
                         cmdArgs = cmd.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                     }
@@ -51,7 +41,29 @@ namespace FDDataTransfer
                     cmd = cmdArgs[0];
                 }
 
-                if (cmd.Equals("deal", StringComparison.OrdinalIgnoreCase) || (cmdArgs.Length > 0 && cmdArgs[0].Equals("deal", StringComparison.OrdinalIgnoreCase)))
+                Func<bool> needContinue = () => !cmdArgs.FirstOrDefault(a => a.Equals("continue", StringComparison.OrdinalIgnoreCase)).IsNullOrEmpty();
+                Func<string, bool> isCmd = name => cmd.Equals(name, StringComparison.OrdinalIgnoreCase) || (cmdArgs.Length > 0 && cmdArgs[0].Equals(name, StringComparison.OrdinalIgnoreCase));
+                // 业绩服务处理
+                Action<AchievementService> actionFinish = acs =>
+                {
+                    acs?.Run(
+                    readResult =>
+                    {
+                        string msg = $"Read Running State:{readResult.State},{readResult.Message}";
+                        if (readResult.Exception != null)
+                            msg += $",Exception:{readResult.Exception.Message},{readResult.Exception.StackTrace}";
+                        Console.WriteLine(msg);
+                    },
+                    writeResult =>
+                    {
+                        string msg = $"Write Running State:{writeResult.State},{writeResult.Message}";
+                        if (writeResult.Exception != null)
+                            msg += $",Exception:{writeResult.Exception.Message},{writeResult.Exception.StackTrace}";
+                        Console.WriteLine(msg);
+                    });
+                };
+
+                if (isCmd("deal") || isCmd("recommend") || isCmd("relation"))
                 {
                     if (cmdArgs.Length < 2)
                     {
@@ -59,7 +71,6 @@ namespace FDDataTransfer
                         goto Menu;
                     }
                     var fileName = cmdArgs[1];
-                    var needContinue = !cmdArgs.FirstOrDefault(a => a.Equals("continue", StringComparison.OrdinalIgnoreCase)).IsNullOrEmpty();
                     if (fileName.IndexOf(':') == -1)
                     {
                         fileName = Path.Combine(RuntimeContext.Current.TableConfigPath, fileName);
@@ -69,11 +80,25 @@ namespace FDDataTransfer
                         Console.WriteLine($"deal业务处理，传入配置文件{fileName}不存在");
                         goto Menu;
                     }
-                    Deal(new DealService(fileName, needContinue));
+                    bool isContinue = needContinue();
+                    DealType type = DealType.All;
+
+                    if (isCmd("recommend"))
+                    {
+                        type = DealType.Recommend;
+                        actionFinish = null;
+                    }
+                    else if (isCmd("relation"))
+                        type = DealType.Relation;
+                    else { }
+
+                    Deal(new DealService(fileName, isContinue), type, () => actionFinish(new AchievementService(fileName, isContinue)));
                 }
                 else if (cmd.Equals("all", StringComparison.OrdinalIgnoreCase))
                 {
-                    Init(() => Deal(new DealService(ConfigManager.Default.TableConfigs[0], false)));
+                    var config = ConfigManager.Default.TableConfigs[0];
+                    Init(() => Deal(new DealService(config, false), 
+                        DealType.All, () => actionFinish(new AchievementService(config, false))));
                 }
                 else if (cmd.IsNullOrEmpty() || cmd.Equals("init", StringComparison.OrdinalIgnoreCase))
                 {
@@ -98,7 +123,7 @@ namespace FDDataTransfer
 
         static void ShowMenu()
         {
-            Console.WriteLine($"输入参数：{Environment.NewLine}  \"init\"：进行数据库数据同步导入（用户基本信息，账户基本信息）；{Environment.NewLine}  \"deal\"：进行数据后续整理（推荐关系，安置关系等）[deal业务处理，需传入配置文件。默认进行全部处理，传入\"continue\"参数进行增量处理]（如：deal xxxconfig.json 或 deal xxxconfig.json continue）；{Environment.NewLine}  \"all\"：先进行数据同步导入操作，当超时完成后；根据同步的第一个配置进行deal操作{Environment.NewLine}回车默认进行数据初始化!{Environment.NewLine}");
+            Console.WriteLine($"输入参数：{Environment.NewLine}  \"init\"：进行数据库数据同步导入（用户基本信息，账户基本信息）；{Environment.NewLine}  \"deal\"：进行数据后续整理（推荐关系，安置关系等）[deal业务处理，需传入配置文件。默认进行全部处理，传入\"continue\"参数进行增量处理]（如：deal xxxconfig.json 或 deal xxxconfig.json continue）；{Environment.NewLine}  \"recommend\"：进行推荐关系数据处理 [recommend业务处理，需传入配置文件。默认进行全部处理，传入\"continue\"参数进行增量处理]（如：recommend xxxconfig.json 或 recommend xxxconfig.json continue）；{Environment.NewLine}  \"relation\"：进行安置关系及业绩数据处理 [relation业务处理，需传入配置文件。默认进行全部处理，传入\"continue\"参数进行增量处理]（如：relation xxxconfig.json 或 relation xxxconfig.json continue）；{Environment.NewLine}  \"all\"：先进行数据同步导入操作，当超时完成后；根据同步的第一个配置进行deal操作{Environment.NewLine}回车默认进行数据初始化!{Environment.NewLine}");
             Console.Write("cmd:");
         }
 
@@ -128,15 +153,49 @@ namespace FDDataTransfer
             }
         }
 
-        static void Deal(IDealService dealService)
+        static void Deal(IDealService dealService, DealType type, Action finished = null)
         {
-            dealService.Run(result =>
+            switch (type)
             {
-                string msg = $"Deal Running State:{result.State},{result.Message}";
-                if (result.Exception != null)
-                    msg += $",Exception:{result.Exception.Message},{result.Exception.StackTrace}";
-                Console.WriteLine(msg);
-            });
+                case DealType.All:
+                    dealService.Run(result =>
+                    {
+                        string msg = $"Deal Running State:{result.State},{result.Message}";
+                        if (result.Exception != null)
+                            msg += $",Exception:{result.Exception.Message},{result.Exception.StackTrace}";
+                        Console.WriteLine(msg);
+                    });
+                    break;
+                case DealType.Recommend:
+                    dealService.RunRecommend(result =>
+                    {
+                        string msg = $"Recommend Running State:{result.State},{result.Message}";
+                        if (result.Exception != null)
+                            msg += $",Exception:{result.Exception.Message},{result.Exception.StackTrace}";
+                        Console.WriteLine(msg);
+                    });
+                    break;
+                case DealType.Relation:
+                    dealService.RunRelation(result =>
+                    {
+                        string msg = $"Relation Running State:{result.State},{result.Message}";
+                        if (result.Exception != null)
+                            msg += $",Exception:{result.Exception.Message},{result.Exception.StackTrace}";
+                        Console.WriteLine(msg);
+
+                        if (result.ServiceFinished)
+                        {
+                            finished.Invoke();
+                        }
+                    });
+                    break;
+            }
+
         }
+    }
+
+    enum DealType
+    {
+        All, Recommend, Relation
     }
 }

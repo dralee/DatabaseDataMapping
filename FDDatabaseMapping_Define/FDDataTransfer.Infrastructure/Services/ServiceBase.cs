@@ -1,9 +1,7 @@
 ﻿using FDDataTransfer.Infrastructure.Entities.Basic;
 using FDDataTransfer.Infrastructure.Repositories;
-using FDDataTransfer.Infrastructure.Entities.Basic;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace FDDataTransfer.Infrastructure.Services
 {
