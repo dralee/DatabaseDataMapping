@@ -1,9 +1,0 @@
-D:\Document\Project\LongAi2\tools\migration\FDDataTransferCore.MySql\bin\Debug\netcoreapp1.1\FDDataTransferMySql.deps.json
-D:\Document\Project\LongAi2\tools\migration\FDDataTransferCore.MySql\bin\Debug\netcoreapp1.1\FDDataTransferMySql.dll
-D:\Document\Project\LongAi2\tools\migration\FDDataTransferCore.MySql\bin\Debug\netcoreapp1.1\FDDataTransferMySql.pdb
-D:\Document\Project\LongAi2\tools\migration\FDDataTransferCore.MySql\bin\Debug\netcoreapp1.1\FDDataTransfer.Infrastructure.dll
-D:\Document\Project\LongAi2\tools\migration\FDDataTransferCore.MySql\bin\Debug\netcoreapp1.1\FDDataTransfer.Infrastructure.pdb
-D:\Document\Project\LongAi2\tools\migration\FDDataTransferCore.MySql\obj\Debug\netcoreapp1.1\FDDataTransfer.MySql.csprojResolveAssemblyReference.cache
-D:\Document\Project\LongAi2\tools\migration\FDDataTransferCore.MySql\obj\Debug\netcoreapp1.1\FDDataTransfer.MySql.AssemblyInfo.cs
-D:\Document\Project\LongAi2\tools\migration\FDDataTransferCore.MySql\obj\Debug\netcoreapp1.1\FDDataTransferMySql.dll
-D:\Document\Project\LongAi2\tools\migration\FDDataTransferCore.MySql\obj\Debug\netcoreapp1.1\FDDataTransferMySql.pdb

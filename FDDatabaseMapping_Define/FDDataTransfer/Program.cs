@@ -5,6 +5,8 @@ using FDDataTransfer.App.Configs;
 using System.Text;
 using FDDataTransfer.Infrastructure.Runtime;
 using System.IO;
+using System.Linq;
+using FDDataTransfer.Infrastructure.Extensions;
 
 namespace FDDataTransfer
 {
@@ -57,6 +59,7 @@ namespace FDDataTransfer
                         goto Menu;
                     }
                     var fileName = cmdArgs[1];
+                    var needContinue = !cmdArgs.FirstOrDefault(a => a.Equals("continue", StringComparison.OrdinalIgnoreCase)).IsNullOrEmpty();
                     if (fileName.IndexOf(':') == -1)
                     {
                         fileName = Path.Combine(RuntimeContext.Current.TableConfigPath, fileName);
@@ -66,15 +69,19 @@ namespace FDDataTransfer
                         Console.WriteLine($"deal业务处理，传入配置文件{fileName}不存在");
                         goto Menu;
                     }
-                    Deal(new DealService(fileName));
+                    Deal(new DealService(fileName, needContinue));
                 }
                 else if (cmd.Equals("all", StringComparison.OrdinalIgnoreCase))
                 {
-                    Init(() => Deal(new DealService(ConfigManager.Default.TableConfigs[0])));
+                    Init(() => Deal(new DealService(ConfigManager.Default.TableConfigs[0], false)));
+                }
+                else if (cmd.IsNullOrEmpty() || cmd.Equals("init", StringComparison.OrdinalIgnoreCase))
+                {
+                    Init();
                 }
                 else
                 {
-                    Init();
+                    goto Menu;
                 }
 
                 //ServiceBase<Entity> serviceFrom = new ServiceBase<Entity>(new ReadWriteRepository<Entity>(context.FromContext));
@@ -91,7 +98,7 @@ namespace FDDataTransfer
 
         static void ShowMenu()
         {
-            Console.WriteLine($"输入参数：{Environment.NewLine}  \"init\"：进行数据库数据同步导入（用户基本信息，账户基本信息）；{Environment.NewLine}  \"deal\"：进行数据后续整理（推荐关系，安置关系等）[deal业务处理，需传入配置文件]（如：deal xxxconfig.json）；{Environment.NewLine}  \"all\"：先进行数据同步导入操作，当超时完成后；根据同步的第一个配置进行deal操作{Environment.NewLine}回车默认进行数据初始化!{Environment.NewLine}");
+            Console.WriteLine($"输入参数：{Environment.NewLine}  \"init\"：进行数据库数据同步导入（用户基本信息，账户基本信息）；{Environment.NewLine}  \"deal\"：进行数据后续整理（推荐关系，安置关系等）[deal业务处理，需传入配置文件。默认进行全部处理，传入\"continue\"参数进行增量处理]（如：deal xxxconfig.json 或 deal xxxconfig.json continue）；{Environment.NewLine}  \"all\"：先进行数据同步导入操作，当超时完成后；根据同步的第一个配置进行deal操作{Environment.NewLine}回车默认进行数据初始化!{Environment.NewLine}");
             Console.Write("cmd:");
         }
 
