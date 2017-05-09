@@ -47,13 +47,13 @@ namespace FDDataTransfer.Infrastructure.Repositories
         /// <param name="tableName">表名</param>
         /// <param name="items">数据项</param>
         /// <param name="manyToOneKeys">数据项中包含多个值的字段名</param>
-        void Execute(string tableName, IDictionary<string, string> items);
+        void Execute(string tableName, IDictionary<string, object> items);
         /// <summary>
         /// 执行插入
         /// </summary>
         /// <param name="tableName">表名</param>
         /// <param name="items">数据项</param>
         /// <param name="manyToOneKeys">数据项中包含多个值的字段名</param>
-        object ExecuteInsert(string tableName, IDictionary<string, string> items, string key = "Id");
+        object ExecuteInsert(string tableName, IDictionary<string, object> items, string key = "Id");
     }
 }

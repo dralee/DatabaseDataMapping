@@ -42,7 +42,7 @@ namespace FDDataTransfer.App.Services
             TimeOutTryAgain(() =>
             {
                 // execute for user
-                userId = context.ExecuteInsert(message.TargetTable, ObjectToString(message.Data)).ToLong();
+                userId = context.ExecuteInsert(message.TargetTable, message.Data).ToLong();
             });
 
             // execute for account
@@ -73,7 +73,7 @@ namespace FDDataTransfer.App.Services
                 row["Status"] = GetMessageData("Status", message);
                 row["UserId"] = userId;
                 row["SrcId"] = GetMessageData("SrcId", message);
-                context.Execute("Finance_Account", ObjectToString(row));
+                context.Execute("Finance_Account", row);
             }
 
             TimeOutTryAgain(() =>
@@ -113,7 +113,7 @@ namespace FDDataTransfer.App.Services
 
             TimeOutTryAgain(() =>
             {
-                context.Execute("User_UserTypeIndex", ObjectToString(row));
+                context.Execute("User_UserTypeIndex", row);
                 this.Log($"Execute For UserTypeIndex :{row.CollToString()} SUCCESS.");
             });
         }
@@ -187,7 +187,7 @@ namespace FDDataTransfer.App.Services
 
                 foreach (var item in resItems)
                 {
-                    context.Execute(targetTable, ObjectToString(item));
+                    context.Execute(targetTable, item);
                 }
             }
         }

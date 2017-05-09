@@ -19,5 +19,10 @@ namespace FDDataTransfer.SqlServer.Repositories
             ConnString = connString;
             Connection = new MySqlConnection(ConnString);
         }
+
+        public override DbParameter CreateParameter(string name, object value)
+        {
+            return new MySqlParameter(name, value);
+        }
     }
 }

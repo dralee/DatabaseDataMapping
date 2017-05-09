@@ -69,7 +69,7 @@ namespace FDDataTransfer.App.Services
 
             TimeOutTryAgain(() =>
             {
-                context.Execute("FenRun_LevelTouchValue", ObjectToString(row));
+                context.Execute("FenRun_LevelTouchValue", row);
                 this.Log($"Execute For Achievement :{row.CollToString()} SUCCESS.");
             });
         }

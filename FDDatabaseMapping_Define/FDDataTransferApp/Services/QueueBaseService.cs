@@ -121,6 +121,7 @@ namespace FDDataTransfer.App.Services
                 while (index < max)
                 {
                     IEnumerable<IDictionary<string, object>> items = context.Get(srcTableName, columns, $"{key} BETWEEN {index} AND {last()}");
+                    //IEnumerable<IDictionary<string, object>> items = context.Get(srcTableName, columns, $"ue_account in ('qmy131418','xg168')");
                     count += items.Count();
 
                     foreach (var item in items)
@@ -219,7 +220,7 @@ namespace FDDataTransfer.App.Services
                             switch (message.MessageType)
                             {
                                 case MessageType.Normal:
-                                    context.Execute(message.TargetTable, ObjectToString(message.Data));
+                                    context.Execute(message.TargetTable, message.Data);
                                     break;
                                 case MessageType.UserDefine:
                                     ExecuteForUserDefineBusiness(context, message);

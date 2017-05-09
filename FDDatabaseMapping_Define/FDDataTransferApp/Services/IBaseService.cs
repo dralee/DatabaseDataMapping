@@ -19,5 +19,14 @@ namespace FDDataTransfer.App.Services
         /// <param name="maxTryTimes">最大重试次数</param>
         /// <param name="tryElapseSeconds">重试间隔（秒）</param>
         void TimeOutTryAgain(Action action, int maxTryTimes = 100, int tryElapseSeconds = 30);
+
+        /// <summary>
+        /// 分页处理
+        /// </summary>
+        /// <param name="data">源数据</param>
+        /// <param name="pageIndex">页索引（0开始）</param>
+        /// <param name="pageCount">页数</param>
+        /// <param name="pageAction">页操作</param>
+        void DealPageData(IList<IDictionary<string, object>> data, int pageIndex, int pageCount, Action<IList<IDictionary<string, object>>> pageAction);
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
+using System.Linq;
 
 namespace FDDataTransfer.App.Services
 {
@@ -30,6 +31,10 @@ namespace FDDataTransfer.App.Services
                 {
                     res[item.Key] = Convert.ToBoolean(item.Value) ? "1" : "0";
                 }
+                else if (item.Value is DateTime)
+                {
+                    res[item.Key] = (item.Value == DBNull.Value) ? "NULL" : $"'{item.Value.ToDateTime(DateTime.MinValue)}'";
+                }
                 else if (isNumeric(item.Value.GetType()))
                 {
                     res[item.Key] = item.Value.ToString();
@@ -40,6 +45,23 @@ namespace FDDataTransfer.App.Services
                 }
             }
             return res;
+        }
+
+        /// <summary>
+        /// 分页处理
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="pageCount"></param>
+        /// <param name="pageAction"></param>
+        public void DealPageData(IList<IDictionary<string, object>> data, int pageIndex, int pageCount, Action<IList<IDictionary<string, object>>> pageAction)
+        {
+            //int pageIndex = 0;
+            int pageSize = data.Count / pageCount + (data.Count % pageCount == 0 ? 0 : 1);
+            //for (pageIndex = 0; pageIndex < pageCount; ++pageIndex)
+            //{
+            var result = data.Skip(pageIndex * pageSize).Take(pageSize).ToList();
+            pageAction?.Invoke(result);
+            //}
         }
 
         Func<string, bool> IsTimeoutMsg = msg =>

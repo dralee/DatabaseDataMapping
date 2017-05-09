@@ -7,13 +7,15 @@ using System.Linq;
 using System.Text;
 using FDDataTransfer.App.Entities;
 using FDDataTransfer.App.Extensions;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace FDDataTransfer.App.Services
 {
     public class DealService : BaseService, IDealService
     {
         private OperConext<Transfer> _context;
-        private IEnumerable<IDictionary<string, object>> _usersFrom;
+        private IList<IDictionary<string, object>> _usersFrom;
         private IList<IDictionary<string, object>> _usersTo;
         private bool _isContinueToDeal; // 增量处理
 
@@ -42,7 +44,7 @@ namespace FDDataTransfer.App.Services
             TimeOutTryAgain(() =>
             {
                 // if (_usersFrom == null)
-                _usersFrom = contextFrom.Get("qefgj_user", new string[] { "UE_ID", "UE_account" }, "");
+                _usersFrom = contextFrom.Get("qefgj_user", new string[] { "UE_ID", "UE_account" }, "").ToList();
                 //if (_usersTo == null)
                 _usersTo = contextTo.Get("User_User", new string[] { "Id", "UserName" }, _isContinueToDeal ? "SrcId>0 AND ParentId=0" : "").ToList();
             });
@@ -110,17 +112,16 @@ namespace FDDataTransfer.App.Services
         }
 
         /// <summary>
-        /// 更新安置关系
+        /// 安置前期准备
         /// </summary>
         /// <param name="contextFrom"></param>
         /// <param name="contextTo"></param>
-        private void ExecuteRelation(IRepositoryContext<Transfer> contextFrom, IRepositoryContext<Transfer> contextTo)
+        private void RelationDataPrepare(IRepositoryContext<Transfer> contextFrom, IRepositoryContext<Transfer> contextTo)
         {
-            //InitUserData(contextFrom, contextTo);
             TimeOutTryAgain(() =>
             {
                 if (_usersFrom == null)
-                    _usersFrom = contextFrom.Get("qefgj_user", new string[] { "UE_ID", "UE_account" }, "");
+                    _usersFrom = contextFrom.Get("qefgj_user", new string[] { "UE_ID", "UE_account" }, "").ToList();
 
                 if (_isContinueToDeal)
                 {
@@ -144,34 +145,104 @@ namespace FDDataTransfer.App.Services
                     }
                 }
             });
+        }
 
+        /// <summary>
+        /// 更新安置关系
+        /// </summary>
+        /// <param name="contextFrom"></param>
+        /// <param name="contextTo"></param>
+        private void ExecuteRelation(IRepositoryContext<Transfer> contextFrom, IRepositoryContext<Transfer> contextTo)
+        {
+            //InitUserData(contextFrom, contextTo);
+            RelationDataPrepare(contextFrom, contextTo);
+
+            if (_isContinueToDeal)
+            {
+                SubRelationContinueProc(contextFrom, contextTo, _usersTo);
+            }
+            else
+            {
+                SubRelationAllProc(contextFrom, contextTo, _usersFrom);
+            }
+        }
+
+        /// <summary>
+        /// 多程更新安置关系
+        /// </summary>
+        /// <param name="fromContexts"></param>
+        /// <param name="toContexts"></param>
+        /// <param name="finish"></param>
+        private void ExecuteRelation(IList<IRepositoryContext<Transfer>> fromContexts, IList<IRepositoryContext<Transfer>> toContexts, Action finish)
+        {
+            RelationDataPrepare(_context.FromContext, _context.ToContext);
+
+            var tasks = new List<Task>();
+            if (_isContinueToDeal)
+            {
+                for (int i = 0; i < _context.ToCount; ++i)
+                {
+                    int index = i;
+                    tasks.Add(
+                        Task.Run(() =>
+                        {
+                            DealPageData(_usersTo, index, _context.ToCount, data =>
+                                             SubRelationContinueProc(fromContexts[index], toContexts[index], data));
+                        })
+                    );
+                };
+            }
+            else
+            {
+                for (int i = 0; i < _context.ToCount; ++i)
+                {
+                    int index = i;
+                    tasks.Add(
+                        Task.Run(() =>
+                        {
+                            DealPageData(_usersFrom, index, _context.ToCount, data =>
+                                            SubRelationAllProc(fromContexts[index], toContexts[index], data));
+                        })
+                    );
+                };
+            }
+            Task.WaitAll(tasks.ToArray());
+            finish?.Invoke();
+        }
+
+        private void SubRelationContinueProc(IRepositoryContext<Transfer> contextFrom, IRepositoryContext<Transfer> contextTo, IList<IDictionary<string, object>> usersTo)
+        {
             TimeOutTryAgain(() =>
             {
                 string sql;
-                if (_isContinueToDeal)
+                foreach (var item in usersTo)
                 {
-                    foreach (var item in _usersTo)
-                    {
-                        var userFrom = _usersFrom.FirstOrDefault(d => d["UE_account"].Equals(item["UserName"]));
-                        if (userFrom == null)
-                            continue;
-                        sql = $"CALL getParentPlace({userFrom["UE_ID"]})";
-                        this.Log($"ExecuteRelation:{sql}");
-                        DealRelation(contextFrom, contextTo, sql, item["Id"]);
-                    }
+                    var userFrom = _usersFrom.FirstOrDefault(d => d["UE_account"].Equals(item["UserName"]));
+                    if (userFrom == null)
+                        continue;
+                    sql = $"CALL getParentPlace({userFrom["UE_ID"]})";
+                    this.Log($"ExecuteRelation:{sql}");
+                    DealRelation(contextFrom, contextTo, sql, item["Id"]);
                 }
-                else
+                this.Log($"SubRelationContinueProc execute ({Thread.CurrentThread.ManagedThreadId}) finish {usersTo.Count} records.");
+            });
+        }
+
+        private void SubRelationAllProc(IRepositoryContext<Transfer> contextFrom, IRepositoryContext<Transfer> contextTo, IEnumerable<IDictionary<string, object>> usersFrom)
+        {
+            TimeOutTryAgain(() =>
+            {
+                string sql;
+                foreach (var item in usersFrom)
                 {
-                    foreach (var item in _usersFrom)
-                    {
-                        sql = $"CALL getParentPlace({item["UE_ID"]})";
-                        var user = _usersTo.FirstOrDefault(d => d["UserName"].Equals(item["UE_account"]));
-                        if (user == null)
-                            continue;
-                        this.Log($"ExecuteRelation:{sql}");
-                        DealRelation(contextFrom, contextTo, sql, user["Id"]);
-                    }
+                    sql = $"CALL getParentPlace({item["UE_ID"]})";
+                    var user = _usersTo.FirstOrDefault(d => d["UserName"].Equals(item["UE_account"]));
+                    if (user == null)
+                        continue;
+                    this.Log($"ExecuteRelation:{sql}");
+                    DealRelation(contextFrom, contextTo, sql, user["Id"]);
                 }
+                this.Log($"SubRelationAllProc execute ({Thread.CurrentThread.ManagedThreadId}) finish {usersFrom.Count()} records.");
             });
         }
 
@@ -212,7 +283,7 @@ namespace FDDataTransfer.App.Services
                 row["ParentMap"] = parentMap;
                 row["SrcId"] = 1000;
 
-                contextTo.Execute("User_PlacementRelation", ObjectToString(row));
+                contextTo.Execute("User_PlacementRelation", row);
                 this.Log($"Execute Relation :{row.CollToString()} SUCCESS.");
             }
         }
@@ -252,11 +323,23 @@ namespace FDDataTransfer.App.Services
                 execResult?.Invoke(result);
                 this.Log(result);
 
-                ExecuteRelation(_context.FromContext, _context.ToContext);
-
-                result = new ExecuteResult { ServiceFinished = true, State = ExecuteState.Success, Message = $"[{DateTime.Now.ToFormatString()}]安置关系处理完毕！" };
-                execResult?.Invoke(result);
-                this.Log(result);
+                bool bSingle = false;
+                if (bSingle)
+                {
+                    ExecuteRelation(_context.FromContext, _context.ToContext);
+                    result = new ExecuteResult { ServiceFinished = true, State = ExecuteState.Success, Message = $"[{DateTime.Now.ToFormatString()}]安置关系处理完毕！" };
+                    execResult?.Invoke(result);
+                    this.Log(result);
+                }
+                else
+                {
+                    ExecuteRelation(_context.FromContexts, _context.ToContexts, () =>
+                     {
+                         result = new ExecuteResult { ServiceFinished = true, State = ExecuteState.Success, Message = $"[{DateTime.Now.ToFormatString()}]安置关系处理完毕！" };
+                         execResult?.Invoke(result);
+                         this.Log(result);
+                     });
+                }
             }
             catch (Exception ex)
             {

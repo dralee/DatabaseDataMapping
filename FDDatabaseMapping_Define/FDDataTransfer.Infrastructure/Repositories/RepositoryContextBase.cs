@@ -1,4 +1,5 @@
 ﻿using FDDataTransfer.Infrastructure.Entities.Basic;
+using FDDataTransfer.Infrastructure.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,6 +16,8 @@ namespace FDDataTransfer.Infrastructure.Repositories
         public abstract Func<Type, string> TableName { get; }
         public abstract DbConnection Connection { get; }
         public abstract Func<DbCommand> Command { get; }
+
+        public abstract DbParameter CreateParameter(string name, object value);
 
         public string GetSql(T item, string sqlFirst, string sqlLast, Func<PropertyInfo, string> sqlItem, Func<PropertyInfo, object, string> sqlValue)
         {
@@ -110,10 +113,12 @@ namespace FDDataTransfer.Infrastructure.Repositories
             return cmd;
         }
 
-        public void ExecuteNonQuery(string sql)
+        public void ExecuteNonQuery(string sql, DbParameter[] parameters = null)
         {
             Open();
             var cmd = GetCommand(sql);
+            if (parameters != null)
+                cmd.Parameters.AddRange(parameters);
             cmd.ExecuteNonQuery();
             Connection.Close();
         }
@@ -149,12 +154,14 @@ namespace FDDataTransfer.Infrastructure.Repositories
         /// <param name="sql"></param>
         /// <param name="tableName"></param>
         /// <returns></returns>
-        public object ExecuteSqlInsert(string sql, string tableName, string key = "Id")
+        public object ExecuteSqlInsert(string sql, string tableName, string key = "Id", DbParameter[] parameters = null)
         {
             Open();
             int index = sql.IndexOf("VALUES", StringComparison.OrdinalIgnoreCase);
             sql = $"{sql.Substring(0, index)} OUTPUT INSERTED.{key} {sql.Substring(index)}";
             var cmd = GetCommand(sql);
+            if (parameters != null)
+                cmd.Parameters.AddRange(parameters);
             var obj = cmd.ExecuteScalar();
             Connection.Close();
             return obj;
@@ -262,7 +269,7 @@ namespace FDDataTransfer.Infrastructure.Repositories
             {
                 sb.AppendFormat(" WHERE {0}", condition);
             }
-            return Get(sb.ToString(),columns);
+            return Get(sb.ToString(), columns);
         }
 
         public IEnumerable<IDictionary<string, object>> Get(string sql, IEnumerable<string> columns = null)
@@ -277,14 +284,28 @@ namespace FDDataTransfer.Infrastructure.Repositories
                     {
                         foreach (var c in columns)
                         {
-                            item.Add(c, reader[c]);
+                            if (typeof(DateTime) == reader.GetFieldType(reader.GetOrdinal(c)))
+                            {
+                                item.Add(c, reader[c].ToDateTime(DateTime.Parse("1/1/1753 12:00:00 AM")));
+                            }
+                            else
+                            {
+                                item.Add(c, reader[c]);
+                            }
                         }
                     }
                     else
                     {
                         for (var i = 0; i < reader.FieldCount; ++i)
                         {
-                            item.Add(reader.GetName(i), reader.GetValue(i));
+                            if (typeof(DateTime) == reader.GetFieldType(i))
+                            {
+                                item.Add(reader.GetName(i), reader.GetValue(i).ToDateTime(DateTime.MinValue));
+                            }
+                            else
+                            {
+                                item.Add(reader.GetName(i), reader.GetValue(i));
+                            }
                         }
                     }
                     res.Add(item);
@@ -293,7 +314,7 @@ namespace FDDataTransfer.Infrastructure.Repositories
             }
         }
 
-        private string GetInsertSql(string tableName, IDictionary<string, string> items)
+        private string GetInsertSql(string tableName, IDictionary<string, object> items)
         {
             StringBuilder sb = new StringBuilder();
             StringBuilder sb2 = new StringBuilder();
@@ -311,18 +332,41 @@ namespace FDDataTransfer.Infrastructure.Repositories
             return sb.ToString();
         }
 
-        public object ExecuteInsert(string tableName, IDictionary<string, string> items, string key)
+        private string GetInsertSql(string tableName, IDictionary<string, object> items, out DbParameter[] parameters)
         {
-            var sql = GetInsertSql(tableName, items);
-            //Execute(sql);
-            return ExecuteSqlInsert(sql, tableName, key);
+            StringBuilder sb = new StringBuilder();
+            StringBuilder sb2 = new StringBuilder();
+            sb.AppendFormat("INSERT INTO {0}(", tableName);
+            sb2.Append(" VALUES (");
+            List<DbParameter> paras = new List<DbParameter>();
+            foreach (var key in items.Keys)
+            {
+                sb.AppendFormat("{0},", key);
+                sb2.AppendFormat("@{0},", key);// items[key]);
+                paras.Add(CreateParameter(key, items[key].CheckValue()));
+            }
+            sb.Remove(sb.Length - 1, 1);
+            sb2.Remove(sb2.Length - 1, 1);
+            sb2.Append(")");
+            sb.Append(")").Append(sb2.ToString());
+            parameters = paras.ToArray();
+            return sb.ToString();
         }
 
-        public void Execute(string tableName, IDictionary<string, string> items)
+        public object ExecuteInsert(string tableName, IDictionary<string, object> items, string key)
         {
-            var sql = GetInsertSql(tableName, items);
+            DbParameter[] parameters;
+            var sql = GetInsertSql(tableName, items, out parameters);
             //Execute(sql);
-            ExecuteNonQuery(sql);
+            return ExecuteSqlInsert(sql, tableName, key, parameters);
+        }
+
+        public void Execute(string tableName, IDictionary<string, object> items)
+        {
+            DbParameter[] parameters;
+            var sql = GetInsertSql(tableName, items, out parameters);
+            //Execute(sql);
+            ExecuteNonQuery(sql, parameters);
         }
     }
 }
