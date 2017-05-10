@@ -20,6 +20,11 @@ namespace FDDataTransfer.App.Services
         protected IMessageQueue<Message> _queue = new MessageQueue<Message>();
 
         /// <summary>
+        /// 读取数据的条件
+        /// </summary>
+        protected string ReadCondition { get; set; }
+
+        /// <summary>
         /// 检测系统消息类型
         /// </summary>
         /// <param name="type"></param>
@@ -68,6 +73,18 @@ namespace FDDataTransfer.App.Services
             return res;
         };
 
+        /// <summary>
+        /// 条件检查
+        /// </summary>
+        /// <param name="preKey"></param>
+        /// <returns></returns>
+        private string CheckCondition(string preKey, string afterKey = "")
+        {
+            if (ReadCondition.IsNullOrEmpty())
+                return string.Empty;
+            return $"{preKey} {ReadCondition} {afterKey}";
+        }
+
         public void Read(IRepositoryContext<Transfer> context, Table tableConfig, Action<ExecuteResult> readFinish)
         {
             if (context == null)
@@ -96,8 +113,8 @@ namespace FDDataTransfer.App.Services
 
             try
             {
-                var index = context.ExecuteScalar($"SELECT MIN({key}) FROM {srcTableName}").ToLong();
-                var max = context.ExecuteScalar($"SELECT MAX({key}) FROM {srcTableName}").ToLong();
+                var index = context.ExecuteScalar($"SELECT MIN({key}) FROM {srcTableName} {CheckCondition("WHERE")}").ToLong();
+                var max = context.ExecuteScalar($"SELECT MAX({key}) FROM {srcTableName} {CheckCondition("WHERE")}").ToLong();
                 var count = 0;
                 var perCount = perExecuteCount;
                 Func<long> last = () => index + perCount - 1;
@@ -120,8 +137,8 @@ namespace FDDataTransfer.App.Services
                 }
                 while (index < max)
                 {
-                    IEnumerable<IDictionary<string, object>> items = context.Get(srcTableName, columns, $"{key} BETWEEN {index} AND {last()}");
-                    //IEnumerable<IDictionary<string, object>> items = context.Get(srcTableName, columns, $"ue_account in ('qmy131418','xg168')");
+                    IEnumerable<IDictionary<string, object>> items = context.Get(srcTableName, columns, $"{CheckCondition("", "AND")} {key} BETWEEN {index} AND {last()}");
+                    //IEnumerable<IDictionary<string, object>> items = context.Get(srcTableName, columns, $"ue_account in ('hyl66666','zgh8899')");
                     count += items.Count();
 
                     foreach (var item in items)
@@ -165,7 +182,7 @@ namespace FDDataTransfer.App.Services
                         var message = new Message(targetItem, extendItem) { TargetTable = targetTableName, MessageType = (MessageType)tableConfig.MessageType };//, ManyToOneData = MapManyToOne(tableConfig.ManyToOneDefaultValues) };
                         CheckMessageStatus(message);
                         _queue.Enqueue(message);
-                        this.Log($"Execute Read: Current Queue({_queue.Count}){message}");
+                        this.Log($"Execute Read({Name}): Current Queue({_queue.Count}){message}");
                     }
                     index += perCount;
                 }
@@ -178,7 +195,7 @@ namespace FDDataTransfer.App.Services
             }
             catch (Exception ex)
             {
-                this.Log("Execute Read Error", ex);
+                this.Log($"Execute Read({Name}) Error", ex);
             }
         }
 
@@ -199,7 +216,7 @@ namespace FDDataTransfer.App.Services
                     {
                         checkTimes++;
                         dtLast = DateTime.Now;
-                        this.Log($"Executing Write: nothing to execute. try for {checkTimes} minutes.Queue current({_queue.Count})");
+                        this.Log($"Executing Write({Name}): nothing to execute. try for {checkTimes} minutes.Queue current({_queue.Count})");
                     }
                     return _context.CurrentTableConfig.NoMessageToQuit != 0 && _context.CurrentTableConfig.NoMessageToQuit < checkTimes; // 是否满足中止条件
                 };
@@ -228,29 +245,29 @@ namespace FDDataTransfer.App.Services
                             }
                             //message.ManyToKeys != null && message.ManyToKeys.Count > 0)                                
                             //ExecuteSpecialManyToOne(context, message.TargetTable, message.Data, message.ManyToKeys);
-                            this.Log($"Execute Write:{message} SUCCESS.");
+                            this.Log($"Execute Write({Name}):{message} SUCCESS.");
                         }
                         catch (Exception ex)
                         {
                             if (message.NeedTry(ex.Message))
                             {
                                 _queue.Enqueue(message);
-                                this.Log($"Execute Write:{message} Failed.Retrying...", ex);
+                                this.Log($"Execute Write({Name}):{message} Failed.Retrying...", ex);
                             }
                             else
                             {
                                 _queue.FailureMessages.Add(message);
-                                this.Log($"Execute Write:{message} Failed.Enter for Failure Message.", ex);
+                                this.Log($"Execute Write({Name}):{message} Failed.Enter for Failure Message.", ex);
                             }
                         }
                     }
                 }
-                writeFinish?.Invoke(new ExecuteResult { Message = $"Execute Write Finished by timeout {elapseMinutes} minutes.", State = ExecuteState.Success });
+                writeFinish?.Invoke(new ExecuteResult { Message = $"Execute Write({Name}) Finished by timeout {elapseMinutes} minutes.", State = ExecuteState.Success });
             }
             catch (Exception ex)
             {
-                this.Log("Execute Write Error", ex);
-                writeFinish?.Invoke(new ExecuteResult { Exception = ex, Message = "Execute Write Error:", State = ExecuteState.Fail });
+                this.Log($"Execute Write({Name}) Error", ex);
+                writeFinish?.Invoke(new ExecuteResult { Exception = ex, Message = $"Execute Write({Name}) Error:", State = ExecuteState.Fail });
             }
         }
 
@@ -311,8 +328,8 @@ namespace FDDataTransfer.App.Services
                     }
                     catch (Exception ex)
                     {
-                        this.Log("Execute Read Error", ex);
-                        readFinish?.Invoke(new ExecuteResult { Exception = ex, Message = "Execute Read Error:", State = ExecuteState.Fail });
+                        this.Log($"Execute Read({Name}) Error", ex);
+                        readFinish?.Invoke(new ExecuteResult { Exception = ex, Message = $"Execute Read({Name}) Error:", State = ExecuteState.Fail });
                     }
                 });
             }
@@ -333,8 +350,8 @@ namespace FDDataTransfer.App.Services
                 }
                 catch (Exception ex)
                 {
-                    writeFinish?.Invoke(new ExecuteResult { Exception = ex, Message = "Execute Write Error:", State = ExecuteState.Fail });
-                    this.Log("Execute Write Error", ex);
+                    writeFinish?.Invoke(new ExecuteResult { Exception = ex, Message = $"Execute Write({Name}) Error:", State = ExecuteState.Fail });
+                    this.Log($"Execute Write({Name}) Error", ex);
                 }
             });
         }

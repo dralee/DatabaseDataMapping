@@ -13,7 +13,7 @@ namespace FDDataTransfer.App.Services
     public class AchievementService : QueueBaseService, IAchievementService
     {
         private bool _isContinueToDeal; // 增量处理
-        private IEnumerable<IDictionary<string, object>> _userLevelInfo; // 用户层级关系
+        private IDictionary<string, IDictionary<string, object>> _userLevelInfo; // 用户层级关系
 
         protected override string Name => "业绩数据处理";
 
@@ -32,7 +32,7 @@ namespace FDDataTransfer.App.Services
         private void InitData(IRepositoryContext<Transfer> context)
         {
             if (_userLevelInfo == null)
-                TimeOutTryAgain(() => _userLevelInfo = context.Get("SELECT u.Id,u.UserName,pr.Level FROM dbo.User_PlacementRelation AS pr INNER JOIN User_User AS u ON u.Id=pr.UserId"));
+                TimeOutTryAgain(() => _userLevelInfo = context.Get("SELECT u.Id,u.UserName,pr.Level FROM dbo.User_PlacementRelation AS pr INNER JOIN User_User AS u ON u.Id=pr.UserId", "UserName"));
         }
 
         /// <summary>
@@ -44,27 +44,34 @@ namespace FDDataTransfer.App.Services
         {
             InitData(context);
 
-            var username = GetMessageData("UserName", message);
-            var userLevel = _userLevelInfo.FirstOrDefault(u => u["UserName"].Equals(username));
-            if (userLevel == null)
+            var username = GetMessageData("UserName", message).ToString();
+
+            if (!_userLevelInfo.TryGetValue(username, out IDictionary<string, object> userLevel))
             {
                 this.Log($"未找到{username}的安置关系信息，业绩数据无法导入。");
                 return;
             }
 
+            //var userLevel = _userLevelInfo.FirstOrDefault(u => u["UserName"].Equals(username));
+            //if (userLevel == null)
+            //{
+            //    this.Log($"未找到{username}的安置关系信息，业绩数据无法导入。");
+            //    return;
+            //}
+
             IDictionary<string, object> row = new Dictionary<string, object>();
             row["ModuleId"] = "5ABF19F3-9E71-4D27-AD0C-D1340D9CB81B";
             row["UserId"] = userLevel["Id"];
             row["Level"] = userLevel["Level"];
-            row["LValue"] = GetMessageData("left_duipen_total", message);
-            row["RValue"] = GetMessageData("right_duipen_total", message);
+            row["LValue"] = GetMessageData("left_duipen_total", message).ToDecimal();
+            row["RValue"] = GetMessageData("right_duipen_total", message).ToDecimal();
             row["TouchedValue"] = 0;
             row["TouchedTime"] = "0001-01-01 00:00:00.0000000";
             row["TouchedReturnTime"] = "0001-01-01 00:00:00.0000000";
-            row["LTeamNum"] = GetMessageData("left_num", message);
-            row["RTeamNum"] = GetMessageData("right_num", message);
-            row["LLeftValue"] = GetMessageData("left_duipen", message);
-            row["RLeftValue"] = GetMessageData("right_duipen", message);
+            row["LTeamNum"] = GetMessageData("left_num", message).ToLong();
+            row["RTeamNum"] = GetMessageData("right_num", message).ToLong();
+            row["LLeftValue"] = GetMessageData("left_duipen", message).ToDecimal();
+            row["RLeftValue"] = GetMessageData("right_duipen", message).ToDecimal();
             row["SrcId"] = GetMessageData("SrcId", message);
 
             TimeOutTryAgain(() =>

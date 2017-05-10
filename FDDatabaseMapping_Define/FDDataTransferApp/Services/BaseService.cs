@@ -64,6 +64,23 @@ namespace FDDataTransfer.App.Services
             //}
         }
 
+        /// <summary>
+        /// 分页处理
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="pageCount"></param>
+        /// <param name="pageAction"></param>
+        public void DealPageData(IDictionary<string, IDictionary<string, object>> data, int pageIndex, int pageCount, Action<IDictionary<string, IDictionary<string, object>>> pageAction)
+        {
+            //int pageIndex = 0;
+            int pageSize = data.Count / pageCount + (data.Count % pageCount == 0 ? 0 : 1);
+            //for (pageIndex = 0; pageIndex < pageCount; ++pageIndex)
+            //{
+            var result = data.Skip(pageIndex * pageSize).Take(pageSize).ToDictionary(e => e.Key, e => e.Value);
+            pageAction?.Invoke(result);
+            //}
+        }
+
         Func<string, bool> IsTimeoutMsg = msg =>
            {
                if (msg.IsNullOrEmpty()) return false;

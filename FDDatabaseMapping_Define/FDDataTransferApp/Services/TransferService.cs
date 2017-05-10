@@ -116,6 +116,20 @@ namespace FDDataTransfer.App.Services
                 context.Execute("User_UserTypeIndex", row);
                 this.Log($"Execute For UserTypeIndex :{row.CollToString()} SUCCESS.");
             });
+
+            var qty = GetMessageData("yj_total", message).ToDecimal();
+            if (qty > 0)
+            {
+                row["AchieveQty"] = qty;
+                row["UserGradeId"] = "72be65e6-3a64-414d-972e-1a3d4a36f400";
+                row["UserTypeId"] = "71BE65E6-3A64-414D-972E-1A3D4A365666";
+                row["Name"] = "服务中心会员";
+                TimeOutTryAgain(() =>
+                {
+                    context.Execute("User_UserTypeIndex", row);
+                    this.Log($"Execute For UserTypeIndex Center Achievement :{row.CollToString()} SUCCESS.");
+                });
+            }
         }
 
         #region many to one

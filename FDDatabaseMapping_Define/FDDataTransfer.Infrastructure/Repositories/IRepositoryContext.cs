@@ -35,12 +35,30 @@ namespace FDDataTransfer.Infrastructure.Repositories
         /// <returns></returns>
         IEnumerable<IDictionary<string, object>> Get(string tableName, IEnumerable<string> columns, string condition);
         /// <summary>
+        /// 根据指定列获取表中字符集
+        /// </summary>
+        /// <param name="tableName">表名</param>
+        /// <param name="keyResult">返回集合中key</param>
+        /// <param name="columns">指定列</param>
+        /// <param name="condition">查询条件</param>
+        /// <returns></returns>
+        IDictionary<string, IDictionary<string, object>> Get(string tableName, string keyResult, IEnumerable<string> columns, string condition);
+        /// <summary>
         /// 据sql获取数据
         /// </summary>
         /// <param name="sql"></param>
         /// <param name="columns">如指定，则只返回指定列数据（不指定则为null，不要初始化）</param>
         /// <returns></returns>
         IEnumerable<IDictionary<string, object>> Get(string sql, IEnumerable<string> columns = null);
+
+        /// <summary>
+        /// 据sql获取数据
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="keyResult">返回集合中key</param>
+        /// <param name="columns"></param>
+        /// <returns></returns>
+        IDictionary<string, IDictionary<string, object>> Get(string sql, string keyResult, IEnumerable<string> columns = null);
         /// <summary>
         /// 执行
         /// </summary>
@@ -55,5 +73,30 @@ namespace FDDataTransfer.Infrastructure.Repositories
         /// <param name="items">数据项</param>
         /// <param name="manyToOneKeys">数据项中包含多个值的字段名</param>
         object ExecuteInsert(string tableName, IDictionary<string, object> items, string key = "Id");
+        
+        /// <summary>
+        /// 开启事务
+        /// </summary>
+        void BeginTransaction();
+
+        /// <summary>
+        /// 提交事务
+        /// </summary>
+        void CommitTransaction();
+
+        /// <summary>
+        /// 事务回滚
+        /// </summary>
+        void RollbackTransaction();
+
+        /// <summary>
+        /// 释放事务
+        /// </summary>
+        void DisposeTransaction();
+
+        /// <summary>
+        /// 关闭连接
+        /// </summary>
+        void Close();
     }
 }

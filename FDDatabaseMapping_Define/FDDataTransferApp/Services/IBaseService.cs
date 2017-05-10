@@ -28,5 +28,14 @@ namespace FDDataTransfer.App.Services
         /// <param name="pageCount">页数</param>
         /// <param name="pageAction">页操作</param>
         void DealPageData(IList<IDictionary<string, object>> data, int pageIndex, int pageCount, Action<IList<IDictionary<string, object>>> pageAction);
+
+        /// <summary>
+        /// 分页处理
+        /// </summary>
+        /// <param name="data">源数据</param>
+        /// <param name="pageIndex">页索引（0开始）</param>
+        /// <param name="pageCount">页数</param>
+        /// <param name="pageAction">页操作</param>
+        void DealPageData(IDictionary<string, IDictionary<string, object>> data, int pageIndex, int pageCount, Action<IDictionary<string, IDictionary<string, object>>> pageAction);
     }
 }

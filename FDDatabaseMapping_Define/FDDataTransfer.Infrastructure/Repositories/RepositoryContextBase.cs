@@ -19,6 +19,40 @@ namespace FDDataTransfer.Infrastructure.Repositories
 
         public abstract DbParameter CreateParameter(string name, object value);
 
+        private DbTransaction _transaction = null;
+
+        public void BeginTransaction()
+        {
+            Open();
+            _transaction = Connection.BeginTransaction();
+        }
+
+        public void CommitTransaction()
+        {
+            if (_transaction != null)
+                _transaction.Commit();
+        }
+
+        public void RollbackTransaction()
+        {
+            if (_transaction != null)
+                _transaction.Rollback();
+        }
+
+        public void DisposeTransaction()
+        {
+            if (_transaction != null)
+            {
+                _transaction.Dispose();
+                _transaction = null;
+            }
+        }
+
+        public void Close()
+        {
+            Connection.Close();
+        }
+
         public string GetSql(T item, string sqlFirst, string sqlLast, Func<PropertyInfo, string> sqlItem, Func<PropertyInfo, object, string> sqlValue)
         {
             var properties = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public);
@@ -109,6 +143,8 @@ namespace FDDataTransfer.Infrastructure.Repositories
         {
             var cmd = Command();
             cmd.Connection = Connection;
+            if (_transaction != null)
+                cmd.Transaction = _transaction;
             cmd.CommandText = sql;
             return cmd;
         }
@@ -120,7 +156,10 @@ namespace FDDataTransfer.Infrastructure.Repositories
             if (parameters != null)
                 cmd.Parameters.AddRange(parameters);
             cmd.ExecuteNonQuery();
-            Connection.Close();
+            if(_transaction == null)
+            {
+                Close();
+            }
         }
 
         /// <summary>
@@ -144,7 +183,10 @@ namespace FDDataTransfer.Infrastructure.Repositories
             sql = $"{sql};{keySql}";
 
             var obj = cmd.ExecuteScalar(); // 居然不返回
-            Connection.Close();
+            if (_transaction == null)
+            {
+                Close();
+            }
             return obj;
         }
 
@@ -163,7 +205,10 @@ namespace FDDataTransfer.Infrastructure.Repositories
             if (parameters != null)
                 cmd.Parameters.AddRange(parameters);
             var obj = cmd.ExecuteScalar();
-            Connection.Close();
+            if (_transaction == null)
+            {
+                Close();
+            }
             return obj;
         }
 
@@ -179,7 +224,10 @@ namespace FDDataTransfer.Infrastructure.Repositories
             Open();
             var cmd = GetCommand(sql);
             var obj = cmd.ExecuteScalar();
-            Connection.Close();
+            if (_transaction == null)
+            {
+                Close();
+            }
             return obj;
         }
 
@@ -272,6 +320,23 @@ namespace FDDataTransfer.Infrastructure.Repositories
             return Get(sb.ToString(), columns);
         }
 
+        public IDictionary<string, IDictionary<string, object>> Get(string tableName, string keyResult, IEnumerable<string> columns, string condition)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("SELECT ");
+            foreach (var c in columns)
+            {
+                sb.AppendFormat("{0},", c);
+            }
+            sb.Remove(sb.Length - 1, 1);
+            sb.AppendFormat(" FROM {0}", tableName);
+            if (!string.IsNullOrEmpty(condition))
+            {
+                sb.AppendFormat(" WHERE {0}", condition);
+            }
+            return Get(sb.ToString(), keyResult, columns);
+        }
+
         public IEnumerable<IDictionary<string, object>> Get(string sql, IEnumerable<string> columns = null)
         {
             using (DbDataReader reader = ExecuteReader(sql))
@@ -309,6 +374,51 @@ namespace FDDataTransfer.Infrastructure.Repositories
                         }
                     }
                     res.Add(item);
+                }
+                return res;
+            }
+        }
+
+        public IDictionary<string, IDictionary<string, object>> Get(string sql, string keyResult, IEnumerable<string> columns = null)
+        {
+            using (DbDataReader reader = ExecuteReader(sql))
+            {
+                IDictionary<string, IDictionary<string, object>> res = new Dictionary<string, IDictionary<string, object>>();
+                while (reader.Read())
+                {
+                    if (reader.GetOrdinal(keyResult) < 0)
+                        break;
+                    Dictionary<string, object> item = new Dictionary<string, object>();
+                    var keyValue = reader[keyResult].ToString();
+                    if (columns != null)
+                    {
+                        foreach (var c in columns)
+                        {
+                            if (typeof(DateTime) == reader.GetFieldType(reader.GetOrdinal(c)))
+                            {
+                                item.Add(c, reader[c].ToDateTime(DateTime.Parse("1/1/1753 12:00:00 AM")));
+                            }
+                            else
+                            {
+                                item.Add(c, reader[c]);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (var i = 0; i < reader.FieldCount; ++i)
+                        {
+                            if (typeof(DateTime) == reader.GetFieldType(i))
+                            {
+                                item.Add(reader.GetName(i), reader.GetValue(i).ToDateTime(DateTime.MinValue));
+                            }
+                            else
+                            {
+                                item.Add(reader.GetName(i), reader.GetValue(i));
+                            }
+                        }
+                    }
+                    res[keyValue] = item;
                 }
                 return res;
             }

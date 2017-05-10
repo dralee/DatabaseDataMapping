@@ -15,8 +15,8 @@ namespace FDDataTransfer.App.Services
     public class DealService : BaseService, IDealService
     {
         private OperConext<Transfer> _context;
-        private IList<IDictionary<string, object>> _usersFrom;
-        private IList<IDictionary<string, object>> _usersTo;
+        private IDictionary<string, IDictionary<string, object>> _usersFrom;
+        private IDictionary<string, IDictionary<string, object>> _usersTo;
         private bool _isContinueToDeal; // 增量处理
 
         protected override string Name => "推荐、安置数据处理";
@@ -44,9 +44,9 @@ namespace FDDataTransfer.App.Services
             TimeOutTryAgain(() =>
             {
                 // if (_usersFrom == null)
-                _usersFrom = contextFrom.Get("qefgj_user", new string[] { "UE_ID", "UE_account" }, "").ToList();
+                _usersFrom = contextFrom.Get("qefgj_user", "UE_account", new string[] { "UE_ID", "UE_account" }, "");
                 //if (_usersTo == null)
-                _usersTo = contextTo.Get("User_User", new string[] { "Id", "UserName" }, _isContinueToDeal ? "SrcId>0 AND ParentId=0" : "").ToList();
+                _usersTo = contextTo.Get("User_User", "UserName", new string[] { "Id", "UserName" }, _isContinueToDeal ? "SrcId>0 AND ParentId=0" : "");
             });
 
             TimeOutTryAgain(() =>
@@ -56,23 +56,30 @@ namespace FDDataTransfer.App.Services
                 {
                     foreach (var item in _usersTo)
                     {
-                        var userFrom = _usersFrom.FirstOrDefault(d => d["UE_account"].Equals(item["UserName"]));
-                        if (userFrom == null)
+                        if (!_usersFrom.ContainsKey(item.Value["UserName"].ToString()))
                             continue;
+
+
+                        var userFrom = _usersFrom[item.Value["UserName"].ToString()];//_usersFrom.FirstOrDefault(d => d["UE_account"].Equals(item["UserName"]));
+                        //if (userFrom == null)
+                        //    continue;
                         sql = $"CALL getParentAccount({userFrom["UE_ID"]})";
                         this.Log($"ExecuteUserRecommend:{sql}");
-                        DealRecommendInfo(contextFrom, contextTo, sql, item["Id"]);
+                        DealRecommendInfo(contextFrom, contextTo, sql, item.Value["Id"]);
                     }
                 }
                 else
                 {
                     foreach (var item in _usersFrom)
                     {
-                        sql = $"CALL getParentAccount({item["UE_ID"]})";
+                        sql = $"CALL getParentAccount({item.Value["UE_ID"]})";
                         this.Log($"ExecuteUserRecommend:{sql}");
-                        var user = _usersTo.FirstOrDefault(d => d["UserName"].Equals(item["UE_account"]));
-                        if (user == null)
+
+                        if (!_usersTo.ContainsKey(item.Value["UE_account"].ToString()))
                             continue;
+                        var user = _usersTo[item.Value["UE_account"].ToString()];//_usersTo.FirstOrDefault(d => d["UserName"].Equals(item["UE_account"]));
+                        //if (user == null)
+                        //    continue;
                         DealRecommendInfo(contextFrom, contextTo, sql, user["Id"]);
                     }
                 }
@@ -95,13 +102,15 @@ namespace FDDataTransfer.App.Services
                 long parentId = 0;
                 while (reader.Read())
                 {
-                    var toUser = _usersTo.FirstOrDefault(d => d["UserName"].Equals(reader["username"]));
-                    if (toUser != null)
-                    {
-                        var ur = new UserRecommend { UserId = toUser["Id"].ToLong(), ParentLevel = level++ };
-                        parents.Add(ur);
-                        parentId = ur.UserId;
-                    }
+                    //var toUser = _usersTo[(reader["username"].ToString()];//_usersTo.FirstOrDefault(d => d["UserName"].Equals(reader["username"]));
+                    if (!_usersTo.TryGetValue(reader["username"].ToString(), out IDictionary<string, object> toUser))
+                        continue;
+                    //if (toUser != null)
+                    //{
+                    var ur = new UserRecommend { UserId = toUser["Id"].ToLong(), ParentLevel = level++ };
+                    parents.Add(ur);
+                    parentId = ur.UserId;
+                    //    }
                 }
                 var parentMap = parents.ToJson();
                 sql = $"UPDATE User_User SET ParentMap='{parentMap}',ParentId={parentId} WHERE Id={targetUserId}";
@@ -121,28 +130,31 @@ namespace FDDataTransfer.App.Services
             TimeOutTryAgain(() =>
             {
                 if (_usersFrom == null)
-                    _usersFrom = contextFrom.Get("qefgj_user", new string[] { "UE_ID", "UE_account" }, "").ToList();
+                    _usersFrom = contextFrom.Get("qefgj_user", "UE_account", new string[] { "UE_ID", "UE_account" }, "");
 
                 if (_isContinueToDeal)
                 {
-                    var userRelations = contextTo.Get("User_PlacementRelation", new string[] { "UserId" }, "SrcId>0")?.ToList();
-                    _usersTo = contextTo.Get("User_User", new string[] { "Id", "UserName" }, _isContinueToDeal ? "SrcId>0" : "").ToList();
+                    var userRelations = contextTo.Get("SELECT u.UserName FROM User_PlacementRelation AS pr INNER JOIN User_User AS u ON u.Id=pr.UserId WHERE pr.SrcId>0").ToList();//("User_PlacementRelation", new string[] { "UserId" }, "SrcId>0")?.ToList();
+                    _usersTo = contextTo.Get("User_User", "UserName", new string[] { "Id", "UserName" }, _isContinueToDeal ? "SrcId>0" : "");
                     if (userRelations != null && userRelations.Count > 0)
                     {
                         //_usersTo = _usersTo.Where(u => !userRelations.Exists(r => r["UserId"].Equals(u["Id"])))?.ToList();
                         foreach (var relation in userRelations)
                         {
-                            var user = _usersTo.FirstOrDefault(u => relation["UserId"].Equals(u["Id"]));
-                            if (user != null)
-                            {
-                                _usersTo.Remove(user);
-                            }
+                            //var user = _usersTo.FirstOrDefault(u => relation["UserId"].Equals(u["Id"]));
+                            string key = relation["UserName"].ToString();
+                            if (!_usersTo.TryGetValue(key, out IDictionary<string, object> user))
+                                continue;
+                            //if (user != null)
+                            //{
+                            _usersTo.Remove(key);//(user);
+                            //}
                         }
                     }
-                    else
-                    {
-                        _usersTo = contextTo.Get("User_User", new string[] { "Id", "UserName" }, "").ToList();
-                    }
+                }
+                else
+                {
+                    _usersTo = contextTo.Get("User_User", "UserName", new string[] { "Id", "UserName" }, "");
                 }
             });
         }
@@ -210,38 +222,95 @@ namespace FDDataTransfer.App.Services
             finish?.Invoke();
         }
 
-        private void SubRelationContinueProc(IRepositoryContext<Transfer> contextFrom, IRepositoryContext<Transfer> contextTo, IList<IDictionary<string, object>> usersTo)
+        private void SubRelationContinueProc(IRepositoryContext<Transfer> contextFrom, IRepositoryContext<Transfer> contextTo, IDictionary<string, IDictionary<string, object>> usersTo)
         {
             TimeOutTryAgain(() =>
             {
                 string sql;
+                int count = 0;
                 foreach (var item in usersTo)
                 {
-                    var userFrom = _usersFrom.FirstOrDefault(d => d["UE_account"].Equals(item["UserName"]));
-                    if (userFrom == null)
+                    if (!_usersFrom.TryGetValue(item.Value["UserName"].ToString(), out IDictionary<string, object> userFrom))
                         continue;
+                    //var userFrom = _usersFrom.FirstOrDefault(d => d["UE_account"].Equals(item["UserName"]));
+                    //if (userFrom == null)
+                    //    continue;
                     sql = $"CALL getParentPlace({userFrom["UE_ID"]})";
                     this.Log($"ExecuteRelation:{sql}");
-                    DealRelation(contextFrom, contextTo, sql, item["Id"]);
+
+                    if (count == 0)
+                    {
+                        contextTo.BeginTransaction();
+                    }
+                    try
+                    {
+                        DealRelation(contextFrom, contextTo, sql, item.Value["Id"]);
+                        count++;
+                        if (count == 1000)
+                        {
+                            SubRelationAllProcSubmitTransaction(contextTo);
+                            count = 0;
+                        }
+                    }
+                    catch
+                    {
+                        contextTo.RollbackTransaction();
+                        contextTo.DisposeTransaction();
+                        contextTo.Close();
+                    }
                 }
+                if (count > 0)
+                    SubRelationAllProcSubmitTransaction(contextTo);
                 this.Log($"SubRelationContinueProc execute ({Thread.CurrentThread.ManagedThreadId}) finish {usersTo.Count} records.");
             });
         }
 
-        private void SubRelationAllProc(IRepositoryContext<Transfer> contextFrom, IRepositoryContext<Transfer> contextTo, IEnumerable<IDictionary<string, object>> usersFrom)
+        private void SubRelationAllProcSubmitTransaction(IRepositoryContext<Transfer> contextTo)
+        {
+            contextTo.CommitTransaction();
+            contextTo.DisposeTransaction();
+            contextTo.Close();
+        }
+
+        private void SubRelationAllProc(IRepositoryContext<Transfer> contextFrom, IRepositoryContext<Transfer> contextTo, IDictionary<string, IDictionary<string, object>> usersFrom)
         {
             TimeOutTryAgain(() =>
             {
                 string sql;
+                int count = 0;
                 foreach (var item in usersFrom)
                 {
-                    sql = $"CALL getParentPlace({item["UE_ID"]})";
-                    var user = _usersTo.FirstOrDefault(d => d["UserName"].Equals(item["UE_account"]));
-                    if (user == null)
+                    sql = $"CALL getParentPlace({item.Value["UE_ID"]})";
+                    if (!_usersTo.TryGetValue(item.Value["UE_account"].ToString(), out IDictionary<string, object> user))
                         continue;
+                    //var user = _usersTo.FirstOrDefault(d => d["UserName"].Equals(item["UE_account"]));
+                    //if (user == null)
+                    //    continue;
+                    if (count == 0)
+                    {
+                        contextTo.BeginTransaction();
+                    }
+                    try
+                    {
+                        DealRelation(contextFrom, contextTo, sql, user["Id"]);
+                        count++;
+                        if (count == 1000)
+                        {
+                            SubRelationAllProcSubmitTransaction(contextTo);
+                            count = 0;
+                        }
+                    }
+                    catch
+                    {
+                        contextTo.RollbackTransaction();
+                        contextTo.DisposeTransaction();
+                        contextTo.Close();
+                    }
                     this.Log($"ExecuteRelation:{sql}");
-                    DealRelation(contextFrom, contextTo, sql, user["Id"]);
                 }
+                if (count > 0)
+                    SubRelationAllProcSubmitTransaction(contextTo);
+
                 this.Log($"SubRelationAllProc execute ({Thread.CurrentThread.ManagedThreadId}) finish {usersFrom.Count()} records.");
             });
         }
@@ -263,13 +332,16 @@ namespace FDDataTransfer.App.Services
                 UserRelation ur = null;
                 while (reader.Read())
                 {
-                    var toUser = _usersTo.FirstOrDefault(d => d["UserName"].Equals(reader["username"]));
-                    if (toUser != null)
-                    {
-                        ur = new UserRelation { UserId = toUser["Id"].ToLong(), ParentLevel = level++, Location = reader["location"].ToInt() };
-                        parents.Add(ur);
-                        parentId = ur.UserId;
-                    }
+                    if (!_usersTo.TryGetValue(reader["username"].ToString(), out IDictionary<string, object> toUser))
+                        continue;
+
+                    //var toUser = _usersTo.FirstOrDefault(d => d["UserName"].Equals(reader["username"]));
+                    //if (toUser != null)
+                    //{
+                    ur = new UserRelation { UserId = toUser["Id"].ToLong(), ParentLevel = level++, Location = reader["location"].ToInt() };
+                    parents.Add(ur);
+                    parentId = ur.UserId;
+                    //}
                 }
                 if (ur == null)
                     return;
@@ -281,7 +353,7 @@ namespace FDDataTransfer.App.Services
                 row["ParentId"] = ur.UserId;
                 row["UserId"] = targetUserId;
                 row["ParentMap"] = parentMap;
-                row["SrcId"] = 1000;
+                row["SrcId"] = reader["userId"];
 
                 contextTo.Execute("User_PlacementRelation", row);
                 this.Log($"Execute Relation :{row.CollToString()} SUCCESS.");
