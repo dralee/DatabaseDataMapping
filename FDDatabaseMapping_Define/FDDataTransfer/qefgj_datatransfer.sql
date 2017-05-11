@@ -67,7 +67,7 @@ BEGIN
 	 WHERE u.UE_ID=accountId;
 	
 	out_label: BEGIN
-	WHILE parentId<>1 DO
+	WHILE TRUE DO
 		
 		INSERT INTO tempuser(userId,username,location) VALUES (parentId,sTemp,parePosition);
 		
