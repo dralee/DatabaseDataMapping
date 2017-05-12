@@ -1,4 +1,4 @@
-# mysql����ִ�иýű�
+﻿# mysql中先执行该脚本
 use qefgj;
 
 DROP PROCEDURE IF EXISTS `getParentAccount`;
