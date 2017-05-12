@@ -22,7 +22,7 @@ BEGIN
 	 WHERE u.UE_ID=accountId AND u2.UE_ID<>accountId;
 	
 	out_label: BEGIN
-	WHILE parentId<>1 DO
+	WHILE TRUE DO
 		INSERT INTO tempuser(userId,username) VALUES (parentId,sTemp);
 		
 		SELECT u2.UE_ID,u2.UE_account INTO parentId,sTemp FROM qefgj_user AS u
