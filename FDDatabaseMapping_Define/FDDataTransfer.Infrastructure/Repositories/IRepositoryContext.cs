@@ -43,6 +43,18 @@ namespace FDDataTransfer.Infrastructure.Repositories
         /// <param name="condition">查询条件</param>
         /// <returns></returns>
         IDictionary<string, IDictionary<string, object>> Get(string tableName, string keyResult, IEnumerable<string> columns, string condition);
+
+        /// <summary>
+        /// 根据指定列获取表中字符集
+        /// </summary>
+        /// <param name="tableName">表名</param>
+        /// <param name="keyResult">返回集合中key</param>
+        /// <param name="checkKeyValue">key的值处理后作为key的值</param>
+        /// <param name="columns">指定列</param>
+        /// <param name="condition">查询条件</param>
+        /// <returns></returns>
+        IDictionary<string, IDictionary<string, object>> Get(string tableName, string keyResult, Func<string, string> checkKeyValue, IEnumerable<string> columns, string condition);
+
         /// <summary>
         /// 据sql获取数据
         /// </summary>
@@ -59,6 +71,17 @@ namespace FDDataTransfer.Infrastructure.Repositories
         /// <param name="columns"></param>
         /// <returns></returns>
         IDictionary<string, IDictionary<string, object>> Get(string sql, string keyResult, IEnumerable<string> columns = null);
+
+        /// <summary>
+        /// 据sql获取数据
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="keyResult">返回集合中key</param>
+        /// <param name="checkKeyValue">key的值处理后作为key的值</param>
+        /// <param name="columns"></param>        
+        /// <returns></returns>
+        IDictionary<string, IDictionary<string, object>> Get(string sql, string keyResult, Func<string, string> checkKeyValue, IEnumerable<string> columns = null);
+
         /// <summary>
         /// 执行
         /// </summary>
@@ -66,6 +89,7 @@ namespace FDDataTransfer.Infrastructure.Repositories
         /// <param name="items">数据项</param>
         /// <param name="manyToOneKeys">数据项中包含多个值的字段名</param>
         void Execute(string tableName, IDictionary<string, object> items);
+
         /// <summary>
         /// 执行插入
         /// </summary>

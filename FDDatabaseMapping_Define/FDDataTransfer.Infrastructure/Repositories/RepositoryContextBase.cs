@@ -156,7 +156,7 @@ namespace FDDataTransfer.Infrastructure.Repositories
             if (parameters != null)
                 cmd.Parameters.AddRange(parameters);
             cmd.ExecuteNonQuery();
-            if(_transaction == null)
+            if (_transaction == null)
             {
                 Close();
             }
@@ -322,6 +322,11 @@ namespace FDDataTransfer.Infrastructure.Repositories
 
         public IDictionary<string, IDictionary<string, object>> Get(string tableName, string keyResult, IEnumerable<string> columns, string condition)
         {
+            return Get(tableName, keyResult, key => key, columns, condition);
+        }
+
+        public IDictionary<string, IDictionary<string, object>> Get(string tableName, string keyResult, Func<string, string> checkKeyValue, IEnumerable<string> columns, string condition)
+        {
             StringBuilder sb = new StringBuilder();
             sb.Append("SELECT ");
             foreach (var c in columns)
@@ -334,7 +339,7 @@ namespace FDDataTransfer.Infrastructure.Repositories
             {
                 sb.AppendFormat(" WHERE {0}", condition);
             }
-            return Get(sb.ToString(), keyResult, columns);
+            return Get(sb.ToString(), keyResult, checkKeyValue, columns);
         }
 
         public IEnumerable<IDictionary<string, object>> Get(string sql, IEnumerable<string> columns = null)
@@ -378,8 +383,12 @@ namespace FDDataTransfer.Infrastructure.Repositories
                 return res;
             }
         }
-
         public IDictionary<string, IDictionary<string, object>> Get(string sql, string keyResult, IEnumerable<string> columns = null)
+        {
+            return Get(sql, keyResult, key => key, columns);
+        }
+
+        public IDictionary<string, IDictionary<string, object>> Get(string sql, string keyResult, Func<string, string> checkKeyValue, IEnumerable<string> columns = null)
         {
             using (DbDataReader reader = ExecuteReader(sql))
             {
@@ -389,7 +398,7 @@ namespace FDDataTransfer.Infrastructure.Repositories
                     if (reader.GetOrdinal(keyResult) < 0)
                         break;
                     Dictionary<string, object> item = new Dictionary<string, object>();
-                    var keyValue = reader[keyResult].ToString();
+                    var keyValue = checkKeyValue(reader[keyResult].ToString());
                     if (columns != null)
                     {
                         foreach (var c in columns)

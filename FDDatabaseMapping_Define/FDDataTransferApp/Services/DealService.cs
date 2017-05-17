@@ -371,10 +371,10 @@ namespace FDDataTransfer.App.Services
         {
             TimeOutTryAgain(() =>
             {
-                _usersFrom = fromContext.Get("qefgj_user", "UE_account", new string[] { "UE_account", "UE_drpd" }, "");
-                _usersTo = toContext.Get("User_User", "UserName", new string[] { "UserName", "Id" }, "");
+                _usersFrom = fromContext.Get("qefgj_user", "UE_account", key => key.ToLower(), new string[] { "UE_account", "UE_drpd" }, "");
+                _usersTo = toContext.Get("User_User", "UserName", key => key.ToLower(), new string[] { "UserName", "Id" }, "");
             });
-            
+
             SubUserCenterProc(toContext, _usersFrom, _usersTo);
 
             // 多批更新的表的，不应该多线程
@@ -400,10 +400,18 @@ namespace FDDataTransfer.App.Services
                 int count = 0;
                 foreach (var item in usersFrom)
                 {
-                    if (!_usersTo.TryGetValue(item.Value["UE_account"].ToString(), out IDictionary<string, object> user))
+                    var account = item.Value["UE_account"].ToString().ToLower();
+                    var drpd = item.Value["UE_drpd"].ToString().ToLower();
+                    if (!_usersTo.TryGetValue(account, out IDictionary<string, object> user))
+                    {
+                        this.Log($"SubUserCenterProc UE_account:{account}不存在于目标库中");
                         continue;
-                    if (!_usersTo.TryGetValue(item.Value["UE_drpd"].ToString(), out IDictionary<string, object> userCenter))
+                    }
+                    if (!_usersTo.TryGetValue(drpd, out IDictionary<string, object> userCenter))
+                    {
+                        this.Log($"SubUserCenterProc UE_drpd:{drpd}不存在于目标库中");
                         continue;
+                    }
                     if (count == 0)
                     {
                         contextTo.BeginTransaction();
