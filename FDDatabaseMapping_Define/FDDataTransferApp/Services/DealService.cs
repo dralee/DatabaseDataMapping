@@ -242,9 +242,9 @@ namespace FDDataTransfer.App.Services
                     {
                         contextTo.BeginTransaction();
                     }
+                    DealRelation(contextFrom, contextTo, sql, item.Value["Id"]);
                     try
                     {
-                        DealRelation(contextFrom, contextTo, sql, item.Value["Id"]);
                         count++;
                         if (count == 1000)
                         {
@@ -252,8 +252,9 @@ namespace FDDataTransfer.App.Services
                             count = 0;
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        this.Log($"DealRelation({sql}, {item.Value["Id"]}); exception:", ex);
                         contextTo.RollbackTransaction();
                         contextTo.DisposeTransaction();
                         contextTo.Close();
@@ -290,9 +291,9 @@ namespace FDDataTransfer.App.Services
                     {
                         contextTo.BeginTransaction();
                     }
+                    DealRelation(contextFrom, contextTo, sql, user["Id"]);
                     try
                     {
-                        DealRelation(contextFrom, contextTo, sql, user["Id"]);
                         count++;
                         if (count == 1000)
                         {
@@ -300,8 +301,9 @@ namespace FDDataTransfer.App.Services
                             count = 0;
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        this.Log($"DealRelation({sql}, {user["Id"]}); exception:", ex);
                         contextTo.RollbackTransaction();
                         contextTo.DisposeTransaction();
                         contextTo.Close();
@@ -357,6 +359,106 @@ namespace FDDataTransfer.App.Services
 
                 contextTo.Execute("User_PlacementRelation", row);
                 this.Log($"Execute Relation :{row.CollToString()} SUCCESS.");
+            }
+        }
+
+        /// <summary>
+        /// 用户数据中心数据
+        /// </summary>
+        /// <param name="toContexts"></param>
+        /// <param name="finish"></param>
+        private void ExecuteUserCenter(IRepositoryContext<Transfer> fromContext, IRepositoryContext<Transfer> toContext)
+        {
+            TimeOutTryAgain(() =>
+            {
+                _usersFrom = fromContext.Get("qefgj_user", "UE_account", new string[] { "UE_account", "UE_drpd" }, "");
+                _usersTo = toContext.Get("User_User", "UserName", new string[] { "UserName", "Id" }, "");
+            });
+            
+            SubUserCenterProc(toContext, _usersFrom, _usersTo);
+
+            // 多批更新的表的，不应该多线程
+            //var tasks = new List<Task>();
+            //for (int i = 0; i < _context.ToCount; ++i)
+            //{
+            //    int index = i;
+            //    tasks.Add(
+            //        Task.Run(() =>
+            //        {
+            //            DealPageData(_usersFrom, index, _context.ToCount, data =>
+            //                            SubUserCenterProc(toContexts[index], data, _usersTo));
+            //        })
+            //    );
+            //}
+        }
+
+        private void SubUserCenterProc(IRepositoryContext<Transfer> contextTo, IDictionary<string, IDictionary<string, object>> usersFrom, IDictionary<string, IDictionary<string, object>> usersTo)
+        {
+            TimeOutTryAgain(() =>
+            {
+                string sql;
+                int count = 0;
+                foreach (var item in usersFrom)
+                {
+                    if (!_usersTo.TryGetValue(item.Value["UE_account"].ToString(), out IDictionary<string, object> user))
+                        continue;
+                    if (!_usersTo.TryGetValue(item.Value["UE_drpd"].ToString(), out IDictionary<string, object> userCenter))
+                        continue;
+                    if (count == 0)
+                    {
+                        contextTo.BeginTransaction();
+                    }
+
+                    sql = $"UPDATE User_User SET ServiceCenterUserId={userCenter["Id"]} WHERE Id={user["Id"]}";
+                    contextTo.Execute(sql);
+                    try
+                    {
+                        count++;
+                        if (count == 1000)
+                        {
+                            SubRelationAllProcSubmitTransaction(contextTo);
+                            count = 0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        this.Log($"SubUserCenterProc({sql}, {user["Id"]}); exception:", ex);
+                        contextTo.RollbackTransaction();
+                        contextTo.DisposeTransaction();
+                        contextTo.Close();
+                    }
+                    this.Log($"SubUserCenterProc:{sql}");
+                }
+                if (count > 0)
+                    SubRelationAllProcSubmitTransaction(contextTo);
+
+                this.Log($"SubUserCenterProc execute ({Thread.CurrentThread.ManagedThreadId}) finish {usersFrom.Count()} records.");
+            });
+        }
+
+        /// <summary>
+        /// 更新用户数据中心
+        /// </summary>
+        /// <param name="contextFrom"></param>
+        /// <param name="contextTo"></param>
+        public void RunUserCenter(Action<ExecuteResult> execResult)
+        {
+            try
+            {
+                ExecuteResult result = new ExecuteResult { State = ExecuteState.Success, Message = $"[{DateTime.Now.ToFormatString()}] 正在处理用户中心关系..." };
+                execResult?.Invoke(result);
+                this.Log(result);
+
+                ExecuteUserCenter(_context.FromContext, _context.ToContext);
+
+                result = new ExecuteResult { ServiceFinished = true, State = ExecuteState.Success, Message = $"[{DateTime.Now.ToFormatString()}] 用户中心关系处理完毕！" };
+                execResult?.Invoke(result);
+                this.Log(result);
+            }
+            catch (Exception ex)
+            {
+                this.Log("Execute UserCenter Error", ex);
+                execResult?.Invoke(new ExecuteResult { Exception = ex, Message = "Execute UserCenter Error:", State = ExecuteState.Fail });
             }
         }
 

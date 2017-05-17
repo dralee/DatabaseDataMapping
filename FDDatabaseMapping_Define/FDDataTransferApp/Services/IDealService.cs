@@ -17,6 +17,13 @@ namespace FDDataTransfer.App.Services
         void RunRecommend(Action<ExecuteResult> result);
 
         /// <summary>
+        /// 更新用户数据中心
+        /// </summary>
+        /// <param name="contextFrom"></param>
+        /// <param name="contextTo"></param>
+        void RunUserCenter(Action<ExecuteResult> result);
+
+        /// <summary>
         /// 更新安置关系
         /// </summary>
         /// <param name="contextFrom"></param>

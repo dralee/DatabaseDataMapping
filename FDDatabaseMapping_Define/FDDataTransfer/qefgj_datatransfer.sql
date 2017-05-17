@@ -14,7 +14,7 @@ BEGIN
 		id INT PRIMARY KEY AUTO_INCREMENT,
 		userId INT,
 		username VARCHAR(60)
-	);
+	)ENGINE=MyISAM DEFAULT CHARSET=utf8;
 	
 	SET parentId=0;
 	SELECT u2.UE_ID,u2.UE_account INTO parentId,sTemp FROM qefgj_user AS u
@@ -59,7 +59,7 @@ BEGIN
 		userId INT,
 		location INT,
 		username VARCHAR(60)
-	);
+	)ENGINE=MyISAM DEFAULT CHARSET=utf8;
 	
 	SET parentId=0;
 	SELECT u2.UE_ID,u2.UE_account,u2.tree_position INTO parentId,sTemp,parePosition FROM qefgj_user AS u

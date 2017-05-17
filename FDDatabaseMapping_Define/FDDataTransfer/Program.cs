@@ -32,7 +32,8 @@ namespace FDDataTransfer
                     if (cmd.StartsWith("deal", StringComparison.OrdinalIgnoreCase)
                         || cmd.StartsWith("recommend", StringComparison.OrdinalIgnoreCase)
                         || cmd.StartsWith("relation", StringComparison.OrdinalIgnoreCase)
-                        || cmd.StartsWith("center", StringComparison.OrdinalIgnoreCase))
+                        || cmd.StartsWith("center", StringComparison.OrdinalIgnoreCase)
+                        || cmd.StartsWith("usercenter", StringComparison.OrdinalIgnoreCase))
                     {
                         cmdArgs = cmd.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                     }
@@ -59,7 +60,7 @@ namespace FDDataTransfer
                     });
                 };
 
-                if (isCmd("deal") || isCmd("recommend") || isCmd("relation") || isCmd("center"))
+                if (isCmd("deal") || isCmd("recommend") || isCmd("relation") || isCmd("center") || isCmd("usercenter"))
                 {
                     if (cmdArgs.Length < 2)
                     {
@@ -88,6 +89,8 @@ namespace FDDataTransfer
                         type = DealType.Relation;
                     else if (isCmd("center"))
                         type = DealType.Center;
+                    else if (isCmd("usercenter"))
+                        type = DealType.UserCenter;
                     else { }
 
                     if (type == DealType.Center)
@@ -136,7 +139,7 @@ namespace FDDataTransfer
 
         static void ShowMenu()
         {
-            Console.WriteLine($"输入参数：{Environment.NewLine}  \"init\"：进行数据库数据同步导入（用户基本信息，账户基本信息，中心业绩）；{Environment.NewLine}  \"deal\"：进行数据后续整理（推荐关系，安置关系等）[deal业务处理，需传入配置文件。默认进行全部处理，传入\"continue\"参数进行增量处理]（如：deal xxxconfig.json 或 deal xxxconfig.json continue）；{Environment.NewLine}  \"recommend\"：进行推荐关系数据处理 [recommend业务处理，需传入配置文件。默认进行全部处理，传入\"continue\"参数进行增量处理]（如：recommend xxxconfig.json 或 recommend xxxconfig.json continue）；{Environment.NewLine}  \"relation\"：进行安置关系及业绩数据处理 [relation业务处理，需传入配置文件。默认进行全部处理，传入\"continue\"参数进行增量处理]（如：relation xxxconfig.json 或 relation xxxconfig.json continue）；{Environment.NewLine}  \"center\"：进行服务中心业绩数据处理 [center业务处理，需传入配置文件。如果执行过init操作，则无须此操作]（如：center xxxconfig.json）；{Environment.NewLine}  \"all\"：先进行数据同步导入操作，当超时完成后；根据同步的第一个配置进行deal操作{Environment.NewLine}回车默认进行数据初始化!{Environment.NewLine}");
+            Console.WriteLine($"输入参数：{Environment.NewLine}  \"init\"：进行数据库数据同步导入（用户基本信息，账户基本信息，中心业绩）；{Environment.NewLine}  \"deal\"：进行数据后续整理（推荐关系，安置关系等）[deal业务处理，需传入配置文件。默认进行全部处理，传入\"continue\"参数进行增量处理]（如：deal xxxconfig.json 或 deal xxxconfig.json continue）；{Environment.NewLine}  \"recommend\"：进行推荐关系数据处理 [recommend业务处理，需传入配置文件。默认进行全部处理，传入\"continue\"参数进行增量处理]（如：recommend xxxconfig.json 或 recommend xxxconfig.json continue）；{Environment.NewLine}  \"relation\"：进行安置关系及业绩数据处理 [relation业务处理，需传入配置文件。默认进行全部处理，传入\"continue\"参数进行增量处理]（如：relation xxxconfig.json 或 relation xxxconfig.json continue）；{Environment.NewLine}  \"center\"：进行服务中心业绩数据处理 [center业务处理，需传入配置文件。如果执行过init操作，则无须此操作]（如：center xxxconfig.json）；{Environment.NewLine}  \"usercenter\"：进行用户中心关系处理 [usercenter业务处理，需传入配置文件。]（如：usercenter xxxconfig.json）；{Environment.NewLine}  \"all\"：先进行数据同步导入操作，当超时完成后；根据同步的第一个配置进行deal操作{Environment.NewLine}回车默认进行数据初始化!{Environment.NewLine}");
             Console.Write("cmd:");
         }
 
@@ -212,6 +215,15 @@ namespace FDDataTransfer
                         }
                     });
                     break;
+                case DealType.UserCenter:
+                    dealService.RunUserCenter(result =>
+                    {
+                        string msg = $"UserCenter Running State:{result.State},{result.Message}";
+                        if (result.Exception != null)
+                            msg += $",Exception:{result.Exception.Message},{result.Exception.StackTrace}";
+                        Console.WriteLine(msg);
+                    });
+                    break;
             }
 
         }
@@ -219,6 +231,6 @@ namespace FDDataTransfer
 
     enum DealType
     {
-        All, Recommend, Relation, Center
+        All, Recommend, Relation, Center, UserCenter
     }
 }

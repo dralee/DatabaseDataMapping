@@ -1,10 +1,10 @@
 ﻿{
-  "ConnStringFrom": "server=****;database=****;user=****;password=****",
+  "ConnStringFrom": "server=****;database=****;user=****;password=****;charset=utf8;",
   "ConnStringTo": "Data Source=****;Initial Catalog=****;UID=****;PWD=****;", //"Data Source=****;Initial Catalog=****;UID=****;PWD=****;",
   "DBContextTypeFrom": "FDDataTransfer.SqlServer.Repositories.MySqlRepositoryContext",
   "DBContextTypeTo": "FDDataTransfer.SqlServer.Repositories.SqlServerRepositoryContext",
   "QueueMaxCount": 1000,
-  "NoMessageToQuit": 1, /* 没有可处理消息多少分钟后退出。0：永久不退出 */
+  "NoMessageToQuit": 10, /* 没有可处理消息多少分钟后退出。0：永久不退出 */
   "Tables": [
     {
       "TableFrom": "qefgj_user",
@@ -57,6 +57,10 @@
         {
           "ColumnFrom": "UE_status",
           "ColumnTo": "Status"
+        },
+        {
+          "ColumnFrom": "UE_regTime",
+          "ColumnTo": "CreateTime"
         },
         {
           "ColumnFrom": "UE_account",
