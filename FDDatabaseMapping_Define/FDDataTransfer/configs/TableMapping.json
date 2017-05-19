@@ -1,6 +1,6 @@
 ﻿{
-  "ConnStringFrom": "server=localhost;database=qefgj;user=root;password=1234;charset=utf8;",
-  "ConnStringTo": "Data Source=183.60.143.29,6100;Initial Catalog=lalz-5ug-com;UID=lalz-5ug-com;PWD=nObwBM7kePlRi0Gs;", //"Data Source=localhost;Initial Catalog=zkcloud;UID=sa;PWD=123;",
+  "ConnStringFrom": "server=****;database=****;user=****;password=****;charset=****;",
+  "ConnStringTo": "Data Source=****;Initial Catalog=****;UID=****;PWD=****;",
   "DBContextTypeFrom": "FDDataTransfer.SqlServer.Repositories.MySqlRepositoryContext",
   "DBContextTypeTo": "FDDataTransfer.SqlServer.Repositories.SqlServerRepositoryContext",
   "QueueMaxCount": 1000,
