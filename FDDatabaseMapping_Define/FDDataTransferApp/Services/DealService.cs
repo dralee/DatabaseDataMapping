@@ -44,9 +44,9 @@ namespace FDDataTransfer.App.Services
             TimeOutTryAgain(() =>
             {
                 // if (_usersFrom == null)
-                _usersFrom = contextFrom.Get("qefgj_user", "UE_account", new string[] { "UE_ID", "UE_account" }, "");
+                _usersFrom = contextFrom.Get("qefgj_user", "UE_account",key=>key.ToTLower(), new string[] { "UE_ID", "UE_account" }, "");
                 //if (_usersTo == null)
-                _usersTo = contextTo.Get("User_User", "UserName", new string[] { "Id", "UserName" }, _isContinueToDeal ? "SrcId>0 AND ParentId=0" : "");
+                _usersTo = contextTo.Get("User_User", "UserName", key => key.ToTLower(), new string[] { "Id", "UserName" }, _isContinueToDeal ? "SrcId>0 AND ParentId=0" : "");
             });
 
             TimeOutTryAgain(() =>
@@ -56,11 +56,11 @@ namespace FDDataTransfer.App.Services
                 {
                     foreach (var item in _usersTo)
                     {
-                        if (!_usersFrom.ContainsKey(item.Value["UserName"].ToString()))
+                        if (!_usersFrom.ContainsKey(item.Value["UserName"].ToTLower()))
                             continue;
 
 
-                        var userFrom = _usersFrom[item.Value["UserName"].ToString()];//_usersFrom.FirstOrDefault(d => d["UE_account"].Equals(item["UserName"]));
+                        var userFrom = _usersFrom[item.Value["UserName"].ToTLower()];//_usersFrom.FirstOrDefault(d => d["UE_account"].Equals(item["UserName"]));
                         //if (userFrom == null)
                         //    continue;
                         sql = $"CALL getParentAccount({userFrom["UE_ID"]})";
@@ -75,9 +75,9 @@ namespace FDDataTransfer.App.Services
                         sql = $"CALL getParentAccount({item.Value["UE_ID"]})";
                         this.Log($"ExecuteUserRecommend:{sql}");
 
-                        if (!_usersTo.ContainsKey(item.Value["UE_account"].ToString()))
+                        if (!_usersTo.ContainsKey(item.Value["UE_account"].ToTLower()))
                             continue;
-                        var user = _usersTo[item.Value["UE_account"].ToString()];//_usersTo.FirstOrDefault(d => d["UserName"].Equals(item["UE_account"]));
+                        var user = _usersTo[item.Value["UE_account"].ToTLower()];//_usersTo.FirstOrDefault(d => d["UserName"].Equals(item["UE_account"]));
                         //if (user == null)
                         //    continue;
                         DealRecommendInfo(contextFrom, contextTo, sql, user["Id"]);
@@ -103,7 +103,7 @@ namespace FDDataTransfer.App.Services
                 while (reader.Read())
                 {
                     //var toUser = _usersTo[(reader["username"].ToString()];//_usersTo.FirstOrDefault(d => d["UserName"].Equals(reader["username"]));
-                    if (!_usersTo.TryGetValue(reader["username"].ToString(), out IDictionary<string, object> toUser))
+                    if (!_usersTo.TryGetValue(reader["username"].ToTLower(), out IDictionary<string, object> toUser))
                         continue;
                     //if (toUser != null)
                     //{
@@ -130,19 +130,19 @@ namespace FDDataTransfer.App.Services
             TimeOutTryAgain(() =>
             {
                 if (_usersFrom == null)
-                    _usersFrom = contextFrom.Get("qefgj_user", "UE_account", new string[] { "UE_ID", "UE_account" }, "");
+                    _usersFrom = contextFrom.Get("qefgj_user", "UE_account",key=>key.ToTLower(), new string[] { "UE_ID", "UE_account" }, "");
 
                 if (_isContinueToDeal)
                 {
                     var userRelations = contextTo.Get("SELECT u.UserName FROM User_PlacementRelation AS pr INNER JOIN User_User AS u ON u.Id=pr.UserId WHERE pr.SrcId>0").ToList();//("User_PlacementRelation", new string[] { "UserId" }, "SrcId>0")?.ToList();
-                    _usersTo = contextTo.Get("User_User", "UserName", new string[] { "Id", "UserName" }, _isContinueToDeal ? "SrcId>0" : "");
+                    _usersTo = contextTo.Get("User_User", "UserName", key => key.ToTLower(), new string[] { "Id", "UserName" }, _isContinueToDeal ? "SrcId>0" : "");
                     if (userRelations != null && userRelations.Count > 0)
                     {
                         //_usersTo = _usersTo.Where(u => !userRelations.Exists(r => r["UserId"].Equals(u["Id"])))?.ToList();
                         foreach (var relation in userRelations)
                         {
                             //var user = _usersTo.FirstOrDefault(u => relation["UserId"].Equals(u["Id"]));
-                            string key = relation["UserName"].ToString();
+                            string key = relation["UserName"].ToTLower();
                             if (!_usersTo.TryGetValue(key, out IDictionary<string, object> user))
                                 continue;
                             //if (user != null)
@@ -154,7 +154,7 @@ namespace FDDataTransfer.App.Services
                 }
                 else
                 {
-                    _usersTo = contextTo.Get("User_User", "UserName", new string[] { "Id", "UserName" }, "");
+                    _usersTo = contextTo.Get("User_User", "UserName", key => key.ToTLower(), new string[] { "Id", "UserName" }, "");
                 }
             });
         }
@@ -230,7 +230,7 @@ namespace FDDataTransfer.App.Services
                 int count = 0;
                 foreach (var item in usersTo)
                 {
-                    if (!_usersFrom.TryGetValue(item.Value["UserName"].ToString(), out IDictionary<string, object> userFrom))
+                    if (!_usersFrom.TryGetValue(item.Value["UserName"].ToTLower(), out IDictionary<string, object> userFrom))
                         continue;
                     //var userFrom = _usersFrom.FirstOrDefault(d => d["UE_account"].Equals(item["UserName"]));
                     //if (userFrom == null)
@@ -282,7 +282,7 @@ namespace FDDataTransfer.App.Services
                 foreach (var item in usersFrom)
                 {
                     sql = $"CALL getParentPlace({item.Value["UE_ID"]})";
-                    if (!_usersTo.TryGetValue(item.Value["UE_account"].ToString(), out IDictionary<string, object> user))
+                    if (!_usersTo.TryGetValue(item.Value["UE_account"].ToTLower(), out IDictionary<string, object> user))
                         continue;
                     //var user = _usersTo.FirstOrDefault(d => d["UserName"].Equals(item["UE_account"]));
                     //if (user == null)
@@ -334,7 +334,7 @@ namespace FDDataTransfer.App.Services
                 UserRelation ur = null;
                 while (reader.Read())
                 {
-                    if (!_usersTo.TryGetValue(reader["username"].ToString(), out IDictionary<string, object> toUser))
+                    if (!_usersTo.TryGetValue(reader["username"].ToTLower(), out IDictionary<string, object> toUser))
                         continue;
 
                     //var toUser = _usersTo.FirstOrDefault(d => d["UserName"].Equals(reader["username"]));
@@ -371,11 +371,11 @@ namespace FDDataTransfer.App.Services
         {
             TimeOutTryAgain(() =>
             {
-                _usersFrom = fromContext.Get("qefgj_user", "UE_account", key => key.ToLower(), new string[] { "UE_account", "UE_drpd" }, "");
-                _usersTo = toContext.Get("User_User", "UserName", key => key.ToLower(), new string[] { "UserName", "Id" }, "");
+                _usersFrom = fromContext.Get("qefgj_user", "UE_account", key => key.ToTLower(), new string[] { "UE_account", "UE_drpd" }, "");
+                _usersTo = toContext.Get("User_User", "UserName", key => key.ToTLower(), new string[] { "UserName", "Id" }, "");
             });
 
-            SubUserCenterProc(toContext, _usersFrom, _usersTo);
+            SubUserCenterProc(toContext, _usersFrom);
 
             // 多批更新的表的，不应该多线程
             //var tasks = new List<Task>();
@@ -392,7 +392,7 @@ namespace FDDataTransfer.App.Services
             //}
         }
 
-        private void SubUserCenterProc(IRepositoryContext<Transfer> contextTo, IDictionary<string, IDictionary<string, object>> usersFrom, IDictionary<string, IDictionary<string, object>> usersTo)
+        private void SubUserCenterProc(IRepositoryContext<Transfer> contextTo, IDictionary<string, IDictionary<string, object>> usersFrom)
         {
             TimeOutTryAgain(() =>
             {
@@ -400,8 +400,8 @@ namespace FDDataTransfer.App.Services
                 int count = 0;
                 foreach (var item in usersFrom)
                 {
-                    var account = item.Value["UE_account"].ToString().ToLower();
-                    var drpd = item.Value["UE_drpd"].ToString().ToLower();
+                    var account = item.Value["UE_account"].ToTLower();
+                    var drpd = item.Value["UE_drpd"].ToTLower();
                     if (!_usersTo.TryGetValue(account, out IDictionary<string, object> user))
                     {
                         this.Log($"SubUserCenterProc UE_account:{account}不存在于目标库中");

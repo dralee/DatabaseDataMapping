@@ -27,7 +27,7 @@ namespace FDDataTransfer.App.Services
         private void InitData(IRepositoryContext<Transfer> context)
         {
             if (_userInfo == null)
-                TimeOutTryAgain(() => _userInfo = context.Get("SELECT Id,UserName FROM User_User ", "UserName"));
+                TimeOutTryAgain(() => _userInfo = context.Get("SELECT Id,UserName FROM User_User ", "UserName", key => key.ToTLower()));
         }
 
         public CenterAchievementService(TableConfig config, bool isContinueToDeal)
@@ -46,7 +46,7 @@ namespace FDDataTransfer.App.Services
         {
             InitData(context);
 
-            var username = GetMessageData("UserName", message).ToString();
+            var username = GetMessageData("UserName", message).ToTLower();
             if (!_userInfo.TryGetValue(username, out IDictionary<string, object> user))
             {
                 this.Log($"未找到{username}的用户信息，服务中心业绩数据无法导入。");

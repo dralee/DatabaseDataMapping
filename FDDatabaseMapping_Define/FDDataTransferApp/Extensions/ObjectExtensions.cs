@@ -57,6 +57,20 @@ namespace FDDataTransfer.App.Extensions
             return sb.ToString();
         }
 
+        public static string ToTLower(this object obj)
+        {
+            if (obj == null)
+                return string.Empty;
+            return obj.ToString().Trim().ToLower();
+        }
+
+        public static string ToTUpper(this object obj)
+        {
+            if (obj == null)
+                return string.Empty;
+            return obj.ToString().Trim().ToUpper();
+        }
+
         public static void Log(this object service, object mesage, Exception ex = null)
         {
             LoggerManager.Log(mesage, ex);

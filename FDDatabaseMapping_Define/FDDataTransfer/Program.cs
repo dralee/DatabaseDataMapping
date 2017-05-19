@@ -156,7 +156,7 @@ namespace FDDataTransfer
                 {
                     WriteResult(writeResult);
 
-                    if (writeResult.State == App.Entities.ExecuteState.Success)
+                    if (writeResult.ServiceFinished)
                         finishToDo?.Invoke();
                 });
                 Console.WriteLine($"Server Running config {config.FileName} ...");

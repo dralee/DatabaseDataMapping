@@ -32,7 +32,7 @@ namespace FDDataTransfer.App.Services
         private void InitData(IRepositoryContext<Transfer> context)
         {
             if (_userLevelInfo == null)
-                TimeOutTryAgain(() => _userLevelInfo = context.Get("SELECT u.Id,u.UserName,pr.Level FROM dbo.User_PlacementRelation AS pr INNER JOIN User_User AS u ON u.Id=pr.UserId", "UserName"));
+                TimeOutTryAgain(() => _userLevelInfo = context.Get("SELECT u.Id,u.UserName,pr.Level FROM dbo.User_PlacementRelation AS pr INNER JOIN User_User AS u ON u.Id=pr.UserId", "UserName", key => key.ToTLower()));
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace FDDataTransfer.App.Services
         {
             InitData(context);
 
-            var username = GetMessageData("UserName", message).ToString();
+            var username = GetMessageData("UserName", message).ToTLower();
 
             if (!_userLevelInfo.TryGetValue(username, out IDictionary<string, object> userLevel))
             {
