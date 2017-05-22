@@ -44,7 +44,7 @@ namespace FDDataTransfer.App.Services
             TimeOutTryAgain(() =>
             {
                 // if (_usersFrom == null)
-                _usersFrom = contextFrom.Get("qefgj_user", "UE_account",key=>key.ToTLower(), new string[] { "UE_ID", "UE_account" }, "");
+                _usersFrom = contextFrom.Get("qefgj_user", "UE_account", key => key.ToTLower(), new string[] { "UE_ID", "UE_account" }, "");
                 //if (_usersTo == null)
                 _usersTo = contextTo.Get("User_User", "UserName", key => key.ToTLower(), new string[] { "Id", "UserName" }, _isContinueToDeal ? "SrcId>0 AND ParentId=0" : "");
             });
@@ -130,7 +130,7 @@ namespace FDDataTransfer.App.Services
             TimeOutTryAgain(() =>
             {
                 if (_usersFrom == null)
-                    _usersFrom = contextFrom.Get("qefgj_user", "UE_account",key=>key.ToTLower(), new string[] { "UE_ID", "UE_account" }, "");
+                    _usersFrom = contextFrom.Get("qefgj_user", "UE_account", key => key.ToTLower(), new string[] { "UE_ID", "UE_account", "tree_position" }, "");
 
                 if (_isContinueToDeal)
                 {
@@ -242,7 +242,7 @@ namespace FDDataTransfer.App.Services
                     {
                         contextTo.BeginTransaction();
                     }
-                    DealRelation(contextFrom, contextTo, sql, item.Value["Id"]);
+                    DealRelation(contextFrom, contextTo, sql, item.Value["Id"], userFrom["tree_position"]);
                     try
                     {
                         count++;
@@ -291,7 +291,7 @@ namespace FDDataTransfer.App.Services
                     {
                         contextTo.BeginTransaction();
                     }
-                    DealRelation(contextFrom, contextTo, sql, user["Id"]);
+                    DealRelation(contextFrom, contextTo, sql, user["Id"], item.Value["tree_position"]);
                     try
                     {
                         count++;
@@ -324,7 +324,7 @@ namespace FDDataTransfer.App.Services
         /// <param name="contextTo"></param>
         /// <param name="sql">源数据sql</param>
         /// <param name="targetUserId">目标用户</param>
-        private void DealRelation(IRepositoryContext<Transfer> contextFrom, IRepositoryContext<Transfer> contextTo, string sql, object targetUserId)
+        private void DealRelation(IRepositoryContext<Transfer> contextFrom, IRepositoryContext<Transfer> contextTo, string sql, object targetUserId, object position)
         {
             using (var reader = contextFrom.ExecuteReader(sql))
             {
@@ -351,7 +351,7 @@ namespace FDDataTransfer.App.Services
 
                 IDictionary<string, object> row = new Dictionary<string, object>();
                 row["Level"] = level;
-                row["Location"] = ur.Location;
+                row["Location"] = position; //ur.Location;
                 row["ParentId"] = ur.UserId;
                 row["UserId"] = targetUserId;
                 row["ParentMap"] = parentMap;
