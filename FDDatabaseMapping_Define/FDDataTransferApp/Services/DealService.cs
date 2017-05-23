@@ -242,7 +242,7 @@ namespace FDDataTransfer.App.Services
                     {
                         contextTo.BeginTransaction();
                     }
-                    DealRelation(contextFrom, contextTo, sql, item.Value["Id"], userFrom["tree_position"]);
+                    DealRelation(contextFrom, contextTo, sql, item.Value["Id"], userFrom["tree_position"], userFrom["UE_ID"]);
                     try
                     {
                         count++;
@@ -291,7 +291,7 @@ namespace FDDataTransfer.App.Services
                     {
                         contextTo.BeginTransaction();
                     }
-                    DealRelation(contextFrom, contextTo, sql, user["Id"], item.Value["tree_position"]);
+                    DealRelation(contextFrom, contextTo, sql, user["Id"], item.Value["tree_position"], item.Value["UE_ID"]);
                     try
                     {
                         count++;
@@ -324,7 +324,7 @@ namespace FDDataTransfer.App.Services
         /// <param name="contextTo"></param>
         /// <param name="sql">源数据sql</param>
         /// <param name="targetUserId">目标用户</param>
-        private void DealRelation(IRepositoryContext<Transfer> contextFrom, IRepositoryContext<Transfer> contextTo, string sql, object targetUserId, object position)
+        private void DealRelation(IRepositoryContext<Transfer> contextFrom, IRepositoryContext<Transfer> contextTo, string sql, object targetUserId, object position, object userFromId)
         {
             using (var reader = contextFrom.ExecuteReader(sql))
             {
@@ -355,7 +355,7 @@ namespace FDDataTransfer.App.Services
                 row["ParentId"] = ur.UserId;
                 row["UserId"] = targetUserId;
                 row["ParentMap"] = parentMap;
-                row["SrcId"] = reader["userId"];
+                row["SrcId"] = userFromId;//reader["userId"];
 
                 contextTo.Execute("User_PlacementRelation", row);
                 this.Log($"Execute Relation :{row.CollToString()} SUCCESS.");
