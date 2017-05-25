@@ -24,6 +24,12 @@ namespace FDDataTransfer.App.Services
         void RunUserCenter(Action<ExecuteResult> result);
 
         /// <summary>
+        /// 修复创业中心数据
+        /// </summary>
+        /// <param name="execResult"></param>
+        void FixServiceCenter(Action<ExecuteResult> execResult);
+
+        /// <summary>
         /// 更新安置关系
         /// </summary>
         /// <param name="contextFrom"></param>

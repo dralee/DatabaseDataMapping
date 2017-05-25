@@ -444,6 +444,79 @@ namespace FDDataTransfer.App.Services
             });
         }
 
+        private void ExecuteServiceCenter(IRepositoryContext<Transfer> fromContext, IRepositoryContext<Transfer> toContext)
+        {
+            var sqlFrom = @"SELECT UE_account,UE_level,UE_status,UE_ID,yj_total FROM qefgj_user AS u INNER JOIN (
+SELECT DISTINCT UE_drpd FROM qefgj_user) T ON T.UE_drpd=u.UE_account";
+            var usersFrom = fromContext.Get(sqlFrom, "UE_account", key => key.ToTLower());
+
+            var sqlTo = @"SELECT Id,UserName FROM User_User AS u WHERE u.Id NOT IN (
+	SELECT UserId FROM dbo.User_UserTypeIndex WHERE UserTypeId='71BE65E6-3A64-414D-972E-1A3D4A365666' AND UserGradeId='72be65e6-3a64-414d-972e-1a3d4a36f400'
+)";
+            var usersTo = toContext.Get(sqlTo, "UserName", key => key.ToTLower());
+
+            foreach (var userFrom in usersFrom)
+            {
+                var userName = userFrom.Key;
+                if (!usersTo.TryGetValue(userName, out IDictionary<string, object> userTo))
+                    continue;
+                ExecuteServiceItem(toContext, userName, userFrom.Value, userTo["Id"]);
+            }
+        }
+
+        private void ExecuteServiceItem(IRepositoryContext<Transfer> context, string userName, IDictionary<string, object> data, object targetUserId)
+        {
+            IDictionary<string, object> row = new Dictionary<string, object>();
+            var level = data["UE_level"].ToInt();//GetMessageData("UE_level", message).ToInt();
+            row["UserGradeId"] = "72be65e6-3a64-414d-972e-1a3d4a36f400";
+            row["UserTypeId"] = "71BE65E6-3A64-414D-972E-1A3D4A365666";
+            row["UserId"] = targetUserId; //user["Id"];
+            row["Name"] = "服务中心会员";
+            row["RegionId"] = 0;
+            row["ExtraDate"] = "";
+            row["CreateTime"] = DateTime.Now;
+            row["ModifiedTime"] = "0001-01-01 00:00:00.0000000";
+            row["Remark"] = "from qefgj database.";
+            row["SortOrder"] = 1000;
+            row["Status"] = data["UE_status"]; //GetMessageData("Status", message);
+            row["SrcId"] = data["UE_ID"]; //GetMessageData("SrcId", message);
+
+            row["ParentId"] = 0;
+            row["UserRegionId"] = 0;
+            row["CheckUserId"] = 0;
+            row["CircleId"] = 0;
+            row["CheckTime"] = DateTime.Now;
+
+            var qty = data["yj_total"].ToDecimal(); //GetMessageData("yj_total", message).ToDecimal();
+            row["AchieveQty"] = qty;
+            TimeOutTryAgain(() =>
+            {
+                context.Execute("User_UserTypeIndex", row);
+                this.Log($"Execute For UserTypeIndex Center Achievement :{row.CollToString()} SUCCESS.");
+            });
+        }
+
+        public void FixServiceCenter(Action<ExecuteResult> execResult)
+        {
+            try
+            {
+                ExecuteResult result = new ExecuteResult { State = ExecuteState.Success, Message = $"[{DateTime.Now.ToFormatString()}] 正在修复创业中心问题..." };
+                execResult?.Invoke(result);
+                this.Log(result);
+
+                ExecuteServiceCenter(_context.FromContext, _context.ToContext);
+
+                result = new ExecuteResult { ServiceFinished = true, State = ExecuteState.Success, Message = $"[{DateTime.Now.ToFormatString()}] 创业中心问题处理完毕！" };
+                execResult?.Invoke(result);
+                this.Log(result);
+            }
+            catch (Exception ex)
+            {
+                this.Log("Execute Service Center Error", ex);
+                execResult?.Invoke(new ExecuteResult { Exception = ex, Message = "Execute Service Center Error:", State = ExecuteState.Fail });
+            }
+        }
+
         /// <summary>
         /// 更新用户数据中心
         /// </summary>
