@@ -1,6 +1,0 @@
-[2022-06-08 15:18:40,425] [6] INFO  FDDataTransferLog [(null)] 
-ExecuteResult:State:Success;Message:[2022-06-08 15:18:39] 正在处理基础数据初始化[写入]...;Exception
-[2022-06-08 15:18:40,425] [9] INFO  FDDataTransferLog [(null)] 
-ExecuteResult:State:Success;Message:[2022-06-08 15:18:39] 正在处理基础数据初始化[读取]...;Exception
-[2022-06-08 15:18:40,491] [6] INFO  FDDataTransferLog [(null)] 
-Executing Write(基础数据初始化): nothing to execute. try for 1 minutes.Queue current(0)
