@@ -1,13 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\" />
-    <Folder Include="Repositories\" />
-    <Folder Include="Services\" />
+    <Compile Remove="Entities\**" />
+    <Compile Remove="Repositories\**" />
+    <Compile Remove="Services\**" />
+    <EmbeddedResource Remove="Entities\**" />
+    <EmbeddedResource Remove="Repositories\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <None Remove="Entities\**" />
+    <None Remove="Repositories\**" />
+    <None Remove="Services\**" />
   </ItemGroup>
 
   <ItemGroup>

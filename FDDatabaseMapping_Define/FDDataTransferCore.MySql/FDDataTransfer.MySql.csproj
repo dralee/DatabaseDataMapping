@@ -1,18 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>FDDataTransferMySql</AssemblyName>
     <RootNamespace>FDDataTransfer.MySql</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\" />
-    <Folder Include="Services\" />
+    <Compile Remove="Entities\**" />
+    <Compile Remove="Services\**" />
+    <EmbeddedResource Remove="Entities\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <None Remove="Entities\**" />
+    <None Remove="Services\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MySql.Data" Version="7.0.7-m61" />
+    <PackageReference Include="MySql.Data" Version="8.0.29" />
   </ItemGroup>
 
   <ItemGroup>

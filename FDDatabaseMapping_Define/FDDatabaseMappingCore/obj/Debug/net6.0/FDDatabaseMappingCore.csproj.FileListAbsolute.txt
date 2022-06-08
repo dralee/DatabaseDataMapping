@@ -1,0 +1,12 @@
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDatabaseMappingCore\bin\Debug\net6.0\FDDatabaseMappingCore.deps.json
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDatabaseMappingCore\bin\Debug\net6.0\FDDatabaseMappingCore.dll
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDatabaseMappingCore\bin\Debug\net6.0\FDDatabaseMappingCore.pdb
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDatabaseMappingCore\obj\Debug\net6.0\FDDatabaseMappingCore.csproj.AssemblyReference.cache
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDatabaseMappingCore\obj\Debug\net6.0\FDDatabaseMappingCore.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDatabaseMappingCore\obj\Debug\net6.0\FDDatabaseMappingCore.AssemblyInfoInputs.cache
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDatabaseMappingCore\obj\Debug\net6.0\FDDatabaseMappingCore.AssemblyInfo.cs
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDatabaseMappingCore\obj\Debug\net6.0\FDDatabaseMappingCore.csproj.CoreCompileInputs.cache
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDatabaseMappingCore\obj\Debug\net6.0\FDDatabaseMappingCore.dll
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDatabaseMappingCore\obj\Debug\net6.0\refint\FDDatabaseMappingCore.dll
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDatabaseMappingCore\obj\Debug\net6.0\FDDatabaseMappingCore.pdb
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDatabaseMappingCore\obj\Debug\net6.0\ref\FDDatabaseMappingCore.dll

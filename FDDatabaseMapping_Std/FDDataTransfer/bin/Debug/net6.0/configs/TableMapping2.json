@@ -1,0 +1,51 @@
+﻿{
+  "ConnStringFrom": "server=localhost;database=fdtest;user=***;password=***",
+  "ConnStringTo": "server=.;initial catalog=testdd;uid=***;password=***",
+  "DBContextTypeFrom": "FDDataTransfer.SqlServer.Repositories.MySqlRepositoryContext",
+  "DBContextTypeTo": "FDDataTransfer.SqlServer.Repositories.SqlServerRepositoryContext",
+  "QueueMaxCount": 500,
+  "Enabled": true,
+  "Tables": [
+    {
+      "TableFrom": "qefgj_user2",
+      "TableTo": "FD_User",
+      "KeyFrom": "UE_ID",
+      "KeyTo": "Id",
+      "PerExecuteCount": 50,
+      "Columns": [
+        {
+          "ColumnFrom": "UE_account",
+          "ColumnTo": "UserName"
+        },
+        {
+          "ColumnFrom": "UE_password",
+          "ColumnTo": "Password"
+        },
+        {
+          "ColumnFrom": "UE_regTime",
+          "ColumnTo": "RegTime"
+        },
+        {
+          "ColumnFrom": "UE_logNum",
+          "ColumnTo": "LogNum"
+        },
+        {
+          "ColumnFrom": "UE_status",
+          "ColumnTo": "Status"
+        },
+        {
+          "ColumnFrom": "UE_level",
+          "ColumnTo": "Level"
+        },
+        {
+          "ColumnFrom": "UE_money",
+          "ColumnTo": "Money"
+        },
+        {
+          "ColumnFrom": "UE_ID",
+          "ColumnTo": "SrcId"
+        }
+      ]
+    }
+  ]
+}

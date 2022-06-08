@@ -1,0 +1,15 @@
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore.SqlServer\bin\Debug\net6.0\FDDataTransferSqlServer.deps.json
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore.SqlServer\bin\Debug\net6.0\FDDataTransferSqlServer.dll
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore.SqlServer\bin\Debug\net6.0\FDDataTransferSqlServer.pdb
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore.SqlServer\bin\Debug\net6.0\FDDataTransfer.Infrastructure.dll
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore.SqlServer\bin\Debug\net6.0\FDDataTransfer.Infrastructure.pdb
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore.SqlServer\obj\Debug\net6.0\FDDataTransfer.SqlServer.csproj.AssemblyReference.cache
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore.SqlServer\obj\Debug\net6.0\FDDataTransfer.SqlServer.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore.SqlServer\obj\Debug\net6.0\FDDataTransfer.SqlServer.AssemblyInfoInputs.cache
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore.SqlServer\obj\Debug\net6.0\FDDataTransfer.SqlServer.AssemblyInfo.cs
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore.SqlServer\obj\Debug\net6.0\FDDataTransfer.SqlServer.csproj.CoreCompileInputs.cache
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore.SqlServer\obj\Debug\net6.0\FDDataTransfer.SqlServer.csproj.CopyComplete
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore.SqlServer\obj\Debug\net6.0\FDDataTransferSqlServer.dll
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore.SqlServer\obj\Debug\net6.0\refint\FDDataTransferSqlServer.dll
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore.SqlServer\obj\Debug\net6.0\FDDataTransferSqlServer.pdb
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore.SqlServer\obj\Debug\net6.0\ref\FDDataTransferSqlServer.dll

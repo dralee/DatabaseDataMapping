@@ -1,18 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>FDDataTransfer.SqlServer</RootNamespace>
     <AssemblyName>FDDataTransferSqlServer</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\" />
-    <Folder Include="Services\" />
+    <Compile Remove="Entities\**" />
+    <Compile Remove="Services\**" />
+    <EmbeddedResource Remove="Entities\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <None Remove="Entities\**" />
+    <None Remove="Services\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Data.SqlClient" Version="4.3.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
   </ItemGroup>
 
   <ItemGroup>

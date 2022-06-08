@@ -1,0 +1,15 @@
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore\bin\Debug\net6.0\FDDataTransfer.Core.deps.json
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore\bin\Debug\net6.0\FDDataTransfer.Core.dll
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore\bin\Debug\net6.0\FDDataTransfer.Core.pdb
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore\bin\Debug\net6.0\FDDataTransfer.Infrastructure.dll
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore\bin\Debug\net6.0\FDDataTransfer.Infrastructure.pdb
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore\obj\Debug\net6.0\FDDataTransfer.Core.csproj.AssemblyReference.cache
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore\obj\Debug\net6.0\FDDataTransfer.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore\obj\Debug\net6.0\FDDataTransfer.Core.AssemblyInfoInputs.cache
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore\obj\Debug\net6.0\FDDataTransfer.Core.AssemblyInfo.cs
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore\obj\Debug\net6.0\FDDataTransfer.Core.csproj.CoreCompileInputs.cache
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore\obj\Debug\net6.0\FDDataTransfer.Core.csproj.CopyComplete
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore\obj\Debug\net6.0\FDDataTransfer.Core.dll
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore\obj\Debug\net6.0\refint\FDDataTransfer.Core.dll
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore\obj\Debug\net6.0\FDDataTransfer.Core.pdb
+C:\Users\Administrator\Documents\worksp\temp\dd\DatabaseDataMapping\FDDatabaseMapping_Define\FDDataTransferCore\obj\Debug\net6.0\ref\FDDataTransfer.Core.dll
