@@ -23,3 +23,5 @@ Edit the config by json(which json file in the "config" folder):
 * **Columns**:the columns mapped by target table and source table.
 * **ExtendQueryColumns**:defined by the self define business to for quey from the source table by once.
 * **ColumnDefaultValues**:the default value for the columns which not exists in the source table and the target table needed.
+
+#
