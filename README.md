@@ -24,4 +24,4 @@ Edit the config by json(which json file in the "config" folder):
 * **ExtendQueryColumns**:defined by the self define business to for quey from the source table by once.
 * **ColumnDefaultValues**:the default value for the columns which not exists in the source table and the target table needed.
 
-# checked
+# unchecked
